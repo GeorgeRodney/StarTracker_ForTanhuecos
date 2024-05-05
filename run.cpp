@@ -15,14 +15,6 @@ int main()
         std::cerr << "Error opening file for writing." << std::endl;
         return 1;
     }
-    // cout << "b" << endl;
-    // int test = -1;
-    // double test2 = -1;
-    // double test3 = -1;
-
-    // detections >> test;
-    // detections >> test2;
-    // detections >> test3;
 
     vector<int>             state(STATE_MAX, -1);
     int frame;
@@ -48,12 +40,7 @@ int main()
     numFrames++;
 
     DetList dets;
-
     TrackFile tracks;
-    // tracks.trackFiles[0].state = OPEN;
-    // tracks.trackFiles[0].estPos[0] = 100; tracks.trackFiles[0].estPos[1] = 106;
-    // tracks.trackFiles[0].predPos[0] = 100; tracks.trackFiles[0].predPos[1] = 106;
-    // tracks.numTracks = 1;
 
     // Define a simple dt to start each frame is dt = 1.0
     double dt = 1.0;
