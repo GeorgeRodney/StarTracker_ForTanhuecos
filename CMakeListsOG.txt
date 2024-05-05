@@ -1,0 +1,24 @@
+cmake_minimum_required(VERSION 3.22)
+
+project(run)
+
+find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+
+set (sources
+    TrackFileMgr.cpp
+    )
+
+set ( headers 
+    TrackFileMgr.hpp
+    TrkUtility.hpp
+    )
+
+add_executable(run run.cpp ${sources} ${headers})
+
+target_link_libraries(run
+    Eigen3::Eigen
+    )
+
+add_executable( writeState  writeState.cpp)
+
+message(STATUS "Eigen include dir: ${EIGEN3_INCLUDE_DIR}")
