@@ -50,14 +50,17 @@ void TrackFileMgr::predictTrackLocation(TrackFile tracks, double dt)
 
 void TrackFileMgr::updateTrackEstPosition(TrackFile &tracks, DetList &dets)
 {
-    MatrixXd H(1,4);
-    H << 1, 1, 0, 0;
+    MatrixXd H(4,4);
+    H << 1, 0, 0, 0,
+         0, 1, 0, 0,
+         0, 0, 1, 0,
+         0, 0, 0, 1;
     MatrixXd H_t = H.transpose();
     MatrixXd R = Matrix4d();
-    R <<    0.111,0,0, 0,
-            0,0.111,0 ,0,
-            0,0,0 ,0,
-            0,0,0 ,0;
+    R <<    0.111,0,    0, 0,
+            0,    0.111,0 ,0,
+            0,    0,    0 ,0,
+            0,    0,    0 ,0;
 
 
     for (int trkIdx = 0; trkIdx < TRACK_MAX; trkIdx++)
@@ -68,11 +71,16 @@ void TrackFileMgr::updateTrackEstPosition(TrackFile &tracks, DetList &dets)
             // Update the track state estimate with the detection information
             
             // Compute the Kalman Gain
-            MatrixXd HPH_tPlusR(4,4);
-            HPH_tPlusR = (H * tracks.trackFiles[trkIdx].predCov * H_t + R); // THIS IS SEG FAULTING. FIND OUT WHY
-            MatrixXd oneOverHPH_tPlusR(4,4);
-            oneOverHPH_tPlusR = HPH_tPlusR.inverse();
-            tracks.trackFiles[trkIdx].K = tracks.trackFiles[trkIdx].predCov * H_t * oneOverHPH_tPlusR;
+            MatrixXd PH(4,4);
+            MatrixXd HPH(4,4);
+            MatrixXd HPHPlusR(4,4);
+            MatrixXd oneOverHPHPlusR(4,4);
+            PH = tracks.trackFiles[trkIdx].predCov * H_t;
+            HPH = H * PH;
+            HPHPlusR = HPH + R;
+            oneOverHPHPlusR = HPHPlusR.inverse();
+            tracks.trackFiles[trkIdx].K = tracks.trackFiles[trkIdx].predCov * H_t * oneOverHPHPlusR;
+            print_matrixTrackVars(tracks.trackFiles[trkIdx].K ,4 ,4);
 
             // Calculate the residual
             double residualX = dets.detList[tracks.trackFiles[trkIdx].corrDet].pos[0] - tracks.trackFiles[trkIdx].predPos[0];
@@ -80,7 +88,7 @@ void TrackFileMgr::updateTrackEstPosition(TrackFile &tracks, DetList &dets)
             MatrixXd Residual(1, 4);
             Residual << residualX, residualY, 0, 0;
             MatrixXd KGainTimesResidual(1,4);
-            KGainTimesResidual = tracks.trackFiles[trkIdx].K * Residual;
+            KGainTimesResidual = tracks.trackFiles[trkIdx].K * Residual; // SEG FAULTING
 
             // Compute the Track Estimated Position
             tracks.trackFiles[trkIdx].estPos[0] = tracks.trackFiles[trkIdx].predPos[0] + KGainTimesResidual(0,0);
@@ -91,6 +99,7 @@ void TrackFileMgr::updateTrackEstPosition(TrackFile &tracks, DetList &dets)
             IdentityMinusKH = (Matrix4d::Identity() - tracks.trackFiles[trkIdx].K* H);
             tracks.trackFiles[trkIdx].estCov = IdentityMinusKH * tracks.trackFiles[trkIdx].predCov * IdentityMinusKH.transpose() +
                                                         tracks.trackFiles[trkIdx].K * R * tracks.trackFiles[trkIdx].K.transpose();
+            print_matrixTrackVars(tracks.trackFiles[trkIdx].estCov ,4 ,4);
         }
     }
        

@@ -9,14 +9,13 @@ int main()
 
     ifstream detections("detections.csv");
 
-    // cout << "a" << endl;
     if (!detections.is_open())
     {
         std::cerr << "Error opening file for writing." << std::endl;
         return 1;
     }
 
-    vector<int>             state(STATE_MAX, -1);
+    vector<int> state(STATE_MAX, -1);
     int frame;
 
     vector<double> xHold(DET_MAX, -1);

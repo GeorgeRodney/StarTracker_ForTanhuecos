@@ -72,7 +72,7 @@ public:
     vector<double> estPos;
     MatrixXd predCov = Matrix4d::Zero();
     MatrixXd estCov = Matrix4d::Zero();
-    MatrixXd K      = Matrix4d::Zero();
+    MatrixXd K = Matrix4d::Zero();
     int corrDet = -1;
     TrackState state = CLOSED;
     uint8_t persistance = 0;
@@ -165,6 +165,21 @@ inline void print_matrix(vector<vector<double>> &matrix, int DET_SIZE, int TRACK
         for (int det = 0; det < DET_SIZE; det++)
         {
             std::cout << setw(2) << matrix[track][det] << ", ";
+        }   
+
+         std::cout << endl;
+    }
+    std::cout << endl;
+}
+
+inline void print_matrixTrackVars(MatrixXd matrix, int DET_SIZE, int TRACK_SIZE)
+{
+    std::cout << "TRACKS" << " X "<< "DETECTIONS" << endl;
+    for (int track = 0; track < TRACK_SIZE; track++)
+    {
+        for (int det = 0; det < DET_SIZE; det++)
+        {
+            std::cout << setw(2) << matrix(track, det) << ", ";
         }   
 
          std::cout << endl;
