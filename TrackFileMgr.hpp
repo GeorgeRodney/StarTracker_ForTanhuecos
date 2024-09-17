@@ -12,7 +12,7 @@ public:
     void updateTrackEstPosition(TrackFile &tracks, DetList &dets);
     void correctTrackState(TrackFile tracks, double dt);
     void checkPersistency(TrackFile &tracks);
-    void frameCleanUp(TrackFile &tracks);
+    void frameCleanUp(TrackFile &tracks, DetList &dets);
     void attemptOpenTracks(TrackFile &tracks, DetList &dets);
     void updateTrackVariables(TrackFile &tracks, DetList &dets);
     

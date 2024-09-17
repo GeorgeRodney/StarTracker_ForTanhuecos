@@ -17,21 +17,21 @@ void TrackFileMgr::predictTrackLocation(TrackFile tracks, double dt)
 {
     // STATE TRANSITION MATRIX F
         MatrixXd F = Matrix4d();
-        F << 1,0,dt,0,0,1,0,dt,0,0,1,0,0,0,0,1;
+        F <<    1,0,dt,0,
+                0,1,0 ,dt,
+                0,0,1 ,0,
+                0,0,0 ,1;
 
-        MatrixXd Q = Matrix2d::Zero();
-        Q(0,0) = (ACCEL_STD*ACCEL_STD);
+        MatrixXd Q = Matrix4d::Zero();
         Q(1,1) = (ACCEL_STD*ACCEL_STD);
-
-        MatrixXd L = MatrixXd(4,2);
-        L << (0.5*dt*dt),0,0,(0.5*dt*dt),dt,0,0,dt;
+        Q(3,3) = (ACCEL_STD*ACCEL_STD);
 
     // Loop over the tracks and predict the current location with constant velocity model
     for (int trkIdx = 0; trkIdx < TRACK_MAX; trkIdx++)
     {
         
 
-        if (tracks.trackFiles[trkIdx].state == OPEN)
+        if (tracks.trackFiles[trkIdx].state != CLOSED)
         {   
             // State update equations. Position and Velocity. 
             tracks.trackFiles[trkIdx].predPos[0] = tracks.trackFiles[trkIdx].estPos[0] * F(0,0) + 
@@ -43,7 +43,7 @@ void TrackFileMgr::predictTrackLocation(TrackFile tracks, double dt)
             tracks.trackFiles[trkIdx].vel[1] = tracks.trackFiles[trkIdx].vel[1] * F(3,3);
 
             // Predict the Covariance Matrix
-            // tracks.trackFiles[trkIdx].predCov = F * tracks.trackFiles[trkIdx].estCov * F.transpose() + Q;
+            tracks.trackFiles[trkIdx].predCov = F * tracks.trackFiles[trkIdx].estCov * F.transpose() + Q;
         }
     }
 }
@@ -57,12 +57,19 @@ void TrackFileMgr::checkPersistency(TrackFile &tracks)
 {
     for (int track = 0; track < TRACK_MAX; track++)
     {
+
         if (tracks.trackFiles[track].state != CLOSED)
         {
             // Update each trackFiles persistancy metric
             if ((tracks.trackFiles[track].corrDet != -1) && (tracks.trackFiles[track].persistance < 4))
             {
                 tracks.trackFiles[track].persistance++;
+
+                // Are we persistent enough to be converged 
+                if (tracks.trackFiles[track].persistance > 3)
+                {
+                    tracks.trackFiles[track].state = CONVERGED;
+                }
             }
             else if((tracks.trackFiles[track].corrDet == -1) && (tracks.trackFiles[track].persistance > 0))
             {
@@ -75,6 +82,14 @@ void TrackFileMgr::checkPersistency(TrackFile &tracks)
                 }
             }
         }
+        // else if (tracks.trackFiles[track].state == CONVERGED)
+        // {
+
+        // }
+        // else
+        // {
+
+        // }
     }
 }
 
@@ -91,16 +106,17 @@ void TrackFileMgr::attemptOpenTracks(TrackFile &tracks, DetList &dets)
                 {
                     tracks.trackFiles[track].state = OPEN;
                     tracks.trackFiles[track].corrDet = det;
+                    tracks.trackFiles[track].persistance++;
 
                     tracks.trackFiles[track].estPos[0] = dets.detList[det].pos[0];
                     tracks.trackFiles[track].estPos[1] = dets.detList[det].pos[1];
                     tracks.trackFiles[track].predPos[0] = dets.detList[det].pos[0];
                     tracks.trackFiles[track].predPos[1] = dets.detList[det].pos[1];
 
-                    tracks.trackFiles[track].predCov(0,0) = 1.0;
+                    tracks.trackFiles[track].predCov(0,0) = 5.0;
                     tracks.trackFiles[track].predCov(1,1) = 1.0;
 
-                    tracks.trackFiles[track].estCov(0,0) = 1.0;
+                    tracks.trackFiles[track].estCov(0,0) = 5.0;
                     tracks.trackFiles[track].estCov(1,1) = 1.0;
 
                     tracks.numTracks++;
@@ -111,22 +127,27 @@ void TrackFileMgr::attemptOpenTracks(TrackFile &tracks, DetList &dets)
     }
 }
 
-void TrackFileMgr::frameCleanUp(TrackFile &tracks)
+void TrackFileMgr::frameCleanUp(TrackFile &tracks, DetList &dets)
 {
     // Clear the associations. The next frame needs the tracks to be a clean slate. 
     for (int track = 0; track < TRACK_MAX; track++)
     {
         tracks.trackFiles[track].cleanCorrelated();
     }
+    // Clear the Detection information
+    for (int det = 0; det < DET_MAX; det++)
+    {
+        dets.detList[det].clearDet();
+    }
+
 }
 
 void TrackFileMgr::updateTrackVariables(TrackFile &tracks, DetList &dets)
 {   
 
-    TrackFileMgr::checkPersistency(tracks);
-
     TrackFileMgr::attemptOpenTracks(tracks, dets);
 
+    TrackFileMgr::checkPersistency(tracks);
 }
 
 void TrackFileMgr::correctTrackState(TrackFile tracks, double dt)

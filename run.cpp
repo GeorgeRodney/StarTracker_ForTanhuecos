@@ -48,14 +48,22 @@ int main()
     for (int frame = 0; frame < numFrames; frame++)
     {
         int detIdx = 0;
+        int detPerFrame = 0;
+        for (int idx = 0; idx < frameHold.size(); idx++)
+        {
+            if (frameHold[idx] == frame)
+            {
+                detPerFrame++;
+            }
+        }
         // Assign DETECTIONS from input file
         for (int idx = 0; idx < frameHold.size(); idx++)
         {
             if (frameHold[idx] == frame)
             {
-                dets.detList[detIdx].pos[0] = xHold[detIdx];
-                dets.detList[detIdx].pos[1] = yHold[detIdx];
-                dets.detList[detIdx].valid = VALID_DET;
+                dets.detList[detIdx].pos[0] = xHold[idx];
+                dets.detList[detIdx].pos[1] = yHold[idx];
+                dets.detList[detIdx].valid  = VALID_DET;
                 detIdx++;
             }
         }
@@ -112,7 +120,7 @@ int main()
         |   5.  Frame clean up 
         |
         >----------------------------------------------------------------------------*/
-        tracker_.frameCleanUp(tracks);
+        tracker_.frameCleanUp(tracks, dets);
     }
 
     return 0;

@@ -25,7 +25,7 @@ int main ()
     double false_rate   = FALSE_DETS / (FPA * FPA);
     int DET_SIZE        = REAL_DETS + FALSE_DETS;
     vector<Detection>   dets(DET_SIZE);
-    int FRAMES          = 2;
+    int FRAMES          = 5;
     int TARGET = 0;
 
     // Originial Target

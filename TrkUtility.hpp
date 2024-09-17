@@ -53,6 +53,15 @@ public:
         measCov(0,0) = STD_MEAS*STD_MEAS;
         measCov(1,1) = STD_MEAS*STD_MEAS;
     };
+
+    void clearDet()
+    {
+        pos[0] = 0;
+        pos[1] = 0;
+        correlated = false;
+        corrTrack = -1;
+        valid = INVALID_DET;
+    }
 };
 
 class Track
