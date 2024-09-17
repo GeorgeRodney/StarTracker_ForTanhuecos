@@ -483,7 +483,7 @@ void TrackFileMgr::auctionAssociate(DetList &dets,
         DONE = false;
 
 
-        while((queue[FRONT] != EMPTY)  && !DONE)
+        while((queue[FRONT] != EMPTY)  && (!DONE))
         {
             // Re-initialize indexes
             for (int i = 0; i < DET_SIZE; i++)
@@ -597,7 +597,5 @@ void TrackFileMgr::auctionAssociate(DetList &dets,
     }
 
     std::cout << "Cost: " << cost << endl;
-
-
-
+    
 }
