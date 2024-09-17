@@ -72,6 +72,7 @@ public:
     vector<double> estPos;
     MatrixXd predCov = Matrix4d::Zero();
     MatrixXd estCov = Matrix4d::Zero();
+    MatrixXd K      = Matrix4d::Zero();
     int corrDet = -1;
     TrackState state = CLOSED;
     uint8_t persistance = 0;
@@ -98,6 +99,7 @@ public:
         estPos.clear();
         predCov = Matrix4d::Zero();
         estCov = Matrix4d::Zero();
+        K      = Matrix4d::Zero();
         corrDet = -1;
         state = CLOSED;
         persistance = 0;
