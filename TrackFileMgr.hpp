@@ -8,6 +8,8 @@ public:
     TrackFileMgr();  // Constructor
     ~TrackFileMgr(); // Destructor
 
+    uint16_t m_frame;
+
     void predictTrackLocation(TrackFile tracks, double dt);
     void updateTrackEstPosition(TrackFile &tracks, DetList &dets);
     void correctTrackState(TrackFile tracks, double dt);

@@ -29,7 +29,7 @@ int main ()
     int TARGET = 0;
 
     // Originial Target
-    dets[TARGET].pos[0] = 100; dets[TARGET].pos[1] = 105;
+    dets[TARGET].pos[0] = 10; dets[TARGET].pos[1] = 12;
     vector<double> vel(2);
     vel[0] = 0.5; vel[1] = 1;
     double dt = 1;

@@ -93,11 +93,12 @@ int main()
         >----------------------------------------------------------------------------
         |
         |   2. Associate Dets and Tracks
+        |      CURRENTLY AUCTION IN BROKEN. IT RUNS FOREVER.
         |
         >----------------------------------------------------------------------------
         */
         cout << endl;
-        tracker_.auctionAssociate(dets, tracks, state, dets.numDets, tracks.numTracks);
+        tracker_.hungarianAssociate(dets, tracks, state, dets.numDets, tracks.numTracks);
         print_state(state);
 
         /*>----------------------------------------------------------------------------
@@ -113,6 +114,18 @@ int main()
         |
         >----------------------------------------------------------------------------*/
         tracker_.updateTrackVariables(tracks, dets);
+
+        // FRAME STATE
+        std::cout << "Frame: " << tracker_.m_frame++ << std::endl;
+        for (int track = 0; track < TRACK_MAX; track++)
+        {
+            if (tracks.trackFiles[track].state != CLOSED)
+            {
+                std::cout << "Track: " << track << ". Correlated?: " << tracks.trackFiles[track].corrDet << ". Status: " << tracks.trackFiles[track].state 
+                    << ". Estimated Position: " << tracks.trackFiles[track].estPos[0] << ". " << tracks.trackFiles[track].estPos[1] << std::endl;
+            }
+            
+        }
 
         /*>----------------------------------------------------------------------------
         |

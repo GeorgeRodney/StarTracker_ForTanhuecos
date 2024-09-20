@@ -172,9 +172,9 @@ inline void print_matrix(vector<vector<double>> &matrix, int DET_SIZE, int TRACK
     std::cout << endl;
 }
 
-inline void print_matrixTrackVars(MatrixXd matrix, int DET_SIZE, int TRACK_SIZE)
+inline void print_matrixMatrix(MatrixXd matrix, int DET_SIZE, int TRACK_SIZE)
 {
-    std::cout << "TRACKS" << " X "<< "DETECTIONS" << endl;
+    std::cout << "TRACKS" << " X MatrixXd"<< "DETECTIONS" << endl;
     for (int track = 0; track < TRACK_SIZE; track++)
     {
         for (int det = 0; det < DET_SIZE; det++)

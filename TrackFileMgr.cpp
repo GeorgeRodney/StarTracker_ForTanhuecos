@@ -4,13 +4,12 @@
 using namespace Eigen;
 
 TrackFileMgr::TrackFileMgr()
+: m_frame(0)
 {
-    // Constructor implementation
 }
 
 TrackFileMgr::~TrackFileMgr()
 {
-    // Destructor implementation
 }
 
 void TrackFileMgr::predictTrackLocation(TrackFile tracks, double dt)
@@ -80,26 +79,27 @@ void TrackFileMgr::updateTrackEstPosition(TrackFile &tracks, DetList &dets)
             HPHPlusR = HPH + R;
             oneOverHPHPlusR = HPHPlusR.inverse();
             tracks.trackFiles[trkIdx].K = tracks.trackFiles[trkIdx].predCov * H_t * oneOverHPHPlusR;
-            print_matrixTrackVars(tracks.trackFiles[trkIdx].K ,4 ,4);
+            // print_matrixMatrix(tracks.trackFiles[trkIdx].K ,4 ,4);
 
             // Calculate the residual
             double residualX = dets.detList[tracks.trackFiles[trkIdx].corrDet].pos[0] - tracks.trackFiles[trkIdx].predPos[0];
             double residualY = dets.detList[tracks.trackFiles[trkIdx].corrDet].pos[1] - tracks.trackFiles[trkIdx].predPos[1];
-            MatrixXd Residual(1, 4);
+            MatrixXd Residual(4, 1);
             Residual << residualX, residualY, 0, 0;
-            MatrixXd KGainTimesResidual(1,4);
-            KGainTimesResidual = tracks.trackFiles[trkIdx].K * Residual; // SEG FAULTING
+            MatrixXd KGainTimesResidual(4, 1);
+            KGainTimesResidual = tracks.trackFiles[trkIdx].K * Residual;
+            // print_matrixMatrix(KGainTimesResidual, 1, 4);
 
             // Compute the Track Estimated Position
             tracks.trackFiles[trkIdx].estPos[0] = tracks.trackFiles[trkIdx].predPos[0] + KGainTimesResidual(0,0);
-            tracks.trackFiles[trkIdx].estPos[1] = tracks.trackFiles[trkIdx].predPos[1] + KGainTimesResidual(0,1);
+            tracks.trackFiles[trkIdx].estPos[1] = tracks.trackFiles[trkIdx].predPos[1] + KGainTimesResidual(1,0);
 
             // Compute the Estimated Covariance Values
             MatrixXd IdentityMinusKH(4,4);
             IdentityMinusKH = (Matrix4d::Identity() - tracks.trackFiles[trkIdx].K* H);
             tracks.trackFiles[trkIdx].estCov = IdentityMinusKH * tracks.trackFiles[trkIdx].predCov * IdentityMinusKH.transpose() +
                                                         tracks.trackFiles[trkIdx].K * R * tracks.trackFiles[trkIdx].K.transpose();
-            print_matrixTrackVars(tracks.trackFiles[trkIdx].estCov ,4 ,4);
+            // print_matrixMatrix(tracks.trackFiles[trkIdx].estCov ,4 ,4);
         }
     }
        
@@ -216,6 +216,10 @@ void TrackFileMgr::hungarianAssociate(  DetList &dets,
                                         int TRACK_SIZE
                                         )
 {
+    if ((tracks.numTracks == 0) || (dets.numDets == 0))
+    {
+        return;
+    }
     cout << "Hungarian: " << endl;
     int TERMINATE;
 

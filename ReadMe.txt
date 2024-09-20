@@ -11,3 +11,7 @@ Birth/Death Step:
 
 Correct Step:
     Estimate the tracks state with an update to the estimated position and vel given a state update equation.
+
+TODO LIST
+    [ ] Add gating scheme to tracks
+    [ ] Fix infinty loop in AUCTION ALGORITHM
