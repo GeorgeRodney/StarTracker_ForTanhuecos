@@ -17,6 +17,8 @@ public:
     void frameCleanUp(TrackFile &tracks, DetList &dets);
     void attemptOpenTracks(TrackFile &tracks, DetList &dets);
     void updateTrackVariables(TrackFile &tracks, DetList &dets);
+
+    void correlateDetsAndTracks(TrackFile &tracks, DetList &dets);
     
     void hungarianAssociate(
                             DetList &dets,

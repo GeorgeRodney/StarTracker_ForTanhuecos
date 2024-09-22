@@ -47,6 +47,11 @@ void TrackFileMgr::predictTrackLocation(TrackFile tracks, double dt)
     }
 }
 
+void correlateDetsAndTracks(TrackFile &tracks, DetList &dets)
+{
+
+}
+
 void TrackFileMgr::updateTrackEstPosition(TrackFile &tracks, DetList &dets)
 {
     MatrixXd H(4,4);
@@ -220,7 +225,7 @@ void TrackFileMgr::hungarianAssociate(  DetList &dets,
     {
         return;
     }
-    cout << "Hungarian: " << endl;
+
     int TERMINATE;
 
     if (DET_SIZE <= TRACK_SIZE)
@@ -234,9 +239,9 @@ void TrackFileMgr::hungarianAssociate(  DetList &dets,
     int assoc               = 0;
     vector<int>             zeros_row(DET_SIZE, 0);
     vector<int>             zeros_col(TRACK_SIZE, 0);
-    vector<vector<double>>  cost_matrix(STATE_MAX, vector<double>(STATE_MAX, 0.0));
-    vector<vector<double>>  OG_cost_matrix(STATE_MAX, vector<double>(STATE_MAX, 0.0));
-    vector<vector<int>>     double_covered(STATE_MAX, vector<int>(STATE_MAX, 0.0));
+    vector<vector<double>>  cost_matrix(TRACK_SIZE, vector<double>(DET_SIZE, 0.0));
+    vector<vector<double>>  OG_cost_matrix(TRACK_SIZE, vector<double>(DET_SIZE, 0.0));
+    vector<vector<int>>     double_covered(TRACK_SIZE, vector<int>(DET_SIZE, 0.0));
     vector<bool>            rowCovered(TRACK_SIZE,false);
     vector<bool>            colCovered(DET_SIZE, false);
     vector<int>             zerosRow(TRACK_SIZE, 0);
