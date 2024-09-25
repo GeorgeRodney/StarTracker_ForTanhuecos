@@ -15,58 +15,100 @@ TrackFileMgr::~TrackFileMgr()
 void TrackFileMgr::predictTrackLocation(TrackFile tracks, double dt)
 {
     // STATE TRANSITION MATRIX F
-        MatrixXd F = Matrix4d();
-        F <<    1,0,dt,0,
-                0,1,0 ,dt,
-                0,0,1 ,0,
-                0,0,0 ,1;
+        vector<vector<double>> F(4, vector<double>(4, 0.0));
+        F[0][0] = 1.0;
+        F[2][0] = dt;
+        F[1][1] = 1.0;
+        F[3][1] = dt;
+        F[2][2] = 1.0;
+        F[3][3] = 1.0;
 
-        MatrixXd Q = Matrix4d::Zero();
-        Q(1,1) = (ACCEL_STD*ACCEL_STD);
-        Q(3,3) = (ACCEL_STD*ACCEL_STD);
+        vector<vector<double>> Q(4, vector<double>(4, 0.0));
+        Q[2][2] = ACCEL_STD*ACCEL_STD;
+        Q[3][3] = ACCEL_STD*ACCEL_STD;
 
     // Loop over the tracks and predict the current location with constant velocity model
     for (int trkIdx = 0; trkIdx < TRACK_MAX; trkIdx++)
     {
-        
-
         if (tracks.trackFiles[trkIdx].state != CLOSED)
         {   
             // State update equations. Position and Velocity. 
-            tracks.trackFiles[trkIdx].predPos[0] = tracks.trackFiles[trkIdx].estPos[0] * F(0,0) + 
-                                                        tracks.trackFiles[trkIdx].vel[0] * F(0,2);
-            tracks.trackFiles[trkIdx].predPos[1] = tracks.trackFiles[trkIdx].estPos[1] * F(1,1) + 
-                                                        tracks.trackFiles[trkIdx].vel[1] * F(1,3);
+            tracks.trackFiles[trkIdx].predPos[0] = tracks.trackFiles[trkIdx].estPos[0] + tracks.trackFiles[trkIdx].estVel[0] * dt;
+            tracks.trackFiles[trkIdx].predPos[1] = tracks.trackFiles[trkIdx].estPos[1] + tracks.trackFiles[trkIdx].estVel[1] * dt;
 
-            tracks.trackFiles[trkIdx].vel[0] = tracks.trackFiles[trkIdx].vel[0] * F(2,2);
-            tracks.trackFiles[trkIdx].vel[1] = tracks.trackFiles[trkIdx].vel[1] * F(3,3);
+            tracks.trackFiles[trkIdx].predVel[0] = tracks.trackFiles[trkIdx].estVel[0];
+            tracks.trackFiles[trkIdx].predVel[1] = tracks.trackFiles[trkIdx].estVel[1];
 
             // Predict the Covariance Matrix
-            tracks.trackFiles[trkIdx].predCov = F * tracks.trackFiles[trkIdx].estCov * F.transpose() + Q;
+            // COLUMN 0
+            tracks.trackFiles[trkIdx].predCov[0][0] = tracks.trackFiles[trkIdx].estCov[0][0] + tracks.trackFiles[trkIdx].estCov[2][0] * dt
+                    + tracks.trackFiles[trkIdx].estCov[0][2] * dt + tracks.trackFiles[trkIdx].estCov[2][2] * dt * dt;
+
+            tracks.trackFiles[trkIdx].predCov[0][1] = tracks.trackFiles[trkIdx].estCov[0][1] + tracks.trackFiles[trkIdx].estCov[2][1] * dt
+                    + tracks.trackFiles[trkIdx].estCov[0][3] * dt + tracks.trackFiles[trkIdx].estCov[2][3] * dt * dt;
+
+            tracks.trackFiles[trkIdx].predCov[0][2] = tracks.trackFiles[trkIdx].estCov[0][2] + tracks.trackFiles[trkIdx].estCov[2][2] * dt;
+
+            tracks.trackFiles[trkIdx].predCov[0][3] = tracks.trackFiles[trkIdx].estCov[0][3] + tracks.trackFiles[trkIdx].estCov[2][3] * dt;
+
+            // COLUMN 1
+            tracks.trackFiles[trkIdx].predCov[1][0] = tracks.trackFiles[trkIdx].estCov[1][0] + tracks.trackFiles[trkIdx].estCov[3][0] * dt
+                    + tracks.trackFiles[trkIdx].estCov[1][2] * dt + tracks.trackFiles[trkIdx].estCov[3][2] * dt * dt;
+
+            tracks.trackFiles[trkIdx].predCov[1][1] = tracks.trackFiles[trkIdx].estCov[1][1] + tracks.trackFiles[trkIdx].estCov[3][1] * dt
+                    + tracks.trackFiles[trkIdx].estCov[1][3] * dt + tracks.trackFiles[trkIdx].estCov[3][3] * dt * dt;
+
+            tracks.trackFiles[trkIdx].predCov[1][2] = tracks.trackFiles[trkIdx].estCov[1][2] + tracks.trackFiles[trkIdx].estCov[3][2] * dt;
+
+            tracks.trackFiles[trkIdx].predCov[1][3] = tracks.trackFiles[trkIdx].estCov[1][3] + tracks.trackFiles[trkIdx].estCov[3][3] * dt;
+
+            // COLUMN 2
+            tracks.trackFiles[trkIdx].predCov[2][0] = tracks.trackFiles[trkIdx].estCov[2][0] + tracks.trackFiles[trkIdx].estCov[2][2] * dt;
+
+            tracks.trackFiles[trkIdx].predCov[2][1] = tracks.trackFiles[trkIdx].estCov[2][1] + tracks.trackFiles[trkIdx].estCov[2][3] * dt;
+
+            tracks.trackFiles[trkIdx].predCov[2][2] = tracks.trackFiles[trkIdx].estCov[2][2] + Q[2][2];
+
+            tracks.trackFiles[trkIdx].predCov[2][3] = tracks.trackFiles[trkIdx].estCov[2][3];
+
+            // COLUMN 3
+            tracks.trackFiles[trkIdx].predCov[3][0] = tracks.trackFiles[trkIdx].estCov[3][0] + tracks.trackFiles[trkIdx].estCov[3][2] * dt;
+
+            tracks.trackFiles[trkIdx].predCov[3][1] = tracks.trackFiles[trkIdx].estCov[3][1] + tracks.trackFiles[trkIdx].estCov[3][3] * dt;
+
+            tracks.trackFiles[trkIdx].predCov[3][2] = tracks.trackFiles[trkIdx].estCov[3][2];
+
+            tracks.trackFiles[trkIdx].predCov[3][3] = tracks.trackFiles[trkIdx].estCov[3][3] + Q[3][3];
         }
     }
 }
 
-void correlateDetsAndTracks(TrackFile &tracks, DetList &dets)
+void TrackFileMgr::correlateDetsAndTracks(TrackFile &tracks, DetList &dets)
 {
+    vector<vector<int>> possibleMatches(tracks.numTracks, vector<int>(dets.numDets, 0.0));
+    // Gate the tracks
+    for(int16_t trackIdx = 0; trackIdx < TRACK_MAX; trackIdx++)
+    {
+        for (int16_t detIdx = 0; detIdx < dets.numDets; detIdx++)
+        {
+            if (tracks.trackFiles[trackIdx].state != CLOSED)
+            {
+                // CALCULATE GATE
+                double diff = statisticalDifferance(trackIdx, tracks, detIdx, dets);
+                possibleMatches[trackIdx][detIdx] = (diff < 5.0 ? 1:0);
+            }
+        }
+    }
+    print_matrix(possibleMatches, dets.numDets, tracks.numTracks);
+
+    // Create gated det track cost matrix
+
+    // Handle the output from correlator and assign the dets to their associated tracks
 
 }
 
 void TrackFileMgr::updateTrackEstPosition(TrackFile &tracks, DetList &dets)
 {
-    MatrixXd H(4,4);
-    H << 1, 0, 0, 0,
-         0, 1, 0, 0,
-         0, 0, 1, 0,
-         0, 0, 0, 1;
-    MatrixXd H_t = H.transpose();
-    MatrixXd R = Matrix4d();
-    R <<    0.111,0,    0, 0,
-            0,    0.111,0 ,0,
-            0,    0,    0 ,0,
-            0,    0,    0 ,0;
-
-
     for (int trkIdx = 0; trkIdx < TRACK_MAX; trkIdx++)
     {
         if (tracks.trackFiles[trkIdx].corrDet != -1)
@@ -75,36 +117,55 @@ void TrackFileMgr::updateTrackEstPosition(TrackFile &tracks, DetList &dets)
             // Update the track state estimate with the detection information
             
             // Compute the Kalman Gain
-            MatrixXd PH(4,4);
-            MatrixXd HPH(4,4);
-            MatrixXd HPHPlusR(4,4);
-            MatrixXd oneOverHPHPlusR(4,4);
-            PH = tracks.trackFiles[trkIdx].predCov * H_t;
-            HPH = H * PH;
-            HPHPlusR = HPH + R;
-            oneOverHPHPlusR = HPHPlusR.inverse();
-            tracks.trackFiles[trkIdx].K = tracks.trackFiles[trkIdx].predCov * H_t * oneOverHPHPlusR;
-            // print_matrixMatrix(tracks.trackFiles[trkIdx].K ,4 ,4);
+            vector<vector<double>> HPH_tPlusR(2, vector<double>(2, 0.0));
+            HPH_tPlusR[0][0] = 1 / (tracks.trackFiles[trkIdx].predCov[0][0] + dets.detList[tracks.trackFiles[trkIdx].corrDet].measCov[0][0]);
+            HPH_tPlusR[1][1] = 1 / (tracks.trackFiles[trkIdx].predCov[1][1] + dets.detList[tracks.trackFiles[trkIdx].corrDet].measCov[1][1]);
 
-            // Calculate the residual
+            vector<vector<double>> K(2 , vector<double>(4, 0.0));
+            K[0][0] = HPH_tPlusR[0][0] * tracks.trackFiles[trkIdx].predCov[0][0];
+            K[0][1] = HPH_tPlusR[0][0] * tracks.trackFiles[trkIdx].predCov[0][1];
+            K[0][1] = HPH_tPlusR[0][0] * tracks.trackFiles[trkIdx].predCov[0][2];
+            K[0][1] = HPH_tPlusR[0][0] * tracks.trackFiles[trkIdx].predCov[0][3];
+
+            K[1][0] = HPH_tPlusR[1][1] * tracks.trackFiles[trkIdx].predCov[1][0];
+            K[1][1] = HPH_tPlusR[1][1] * tracks.trackFiles[trkIdx].predCov[1][1];
+            K[1][2] = HPH_tPlusR[1][1] * tracks.trackFiles[trkIdx].predCov[1][2];
+            K[1][3] = HPH_tPlusR[1][1] * tracks.trackFiles[trkIdx].predCov[1][3];
+
+            // // Calculate the residual
             double residualX = dets.detList[tracks.trackFiles[trkIdx].corrDet].pos[0] - tracks.trackFiles[trkIdx].predPos[0];
             double residualY = dets.detList[tracks.trackFiles[trkIdx].corrDet].pos[1] - tracks.trackFiles[trkIdx].predPos[1];
-            MatrixXd Residual(4, 1);
-            Residual << residualX, residualY, 0, 0;
-            MatrixXd KGainTimesResidual(4, 1);
-            KGainTimesResidual = tracks.trackFiles[trkIdx].K * Residual;
-            // print_matrixMatrix(KGainTimesResidual, 1, 4);
 
-            // Compute the Track Estimated Position
-            tracks.trackFiles[trkIdx].estPos[0] = tracks.trackFiles[trkIdx].predPos[0] + KGainTimesResidual(0,0);
-            tracks.trackFiles[trkIdx].estPos[1] = tracks.trackFiles[trkIdx].predPos[1] + KGainTimesResidual(1,0);
+            // // Compute the Track Estimated Position
+            tracks.trackFiles[trkIdx].estPos[0] = tracks.trackFiles[trkIdx].predPos[0] + K[0][0] * residualX + K[1][0] * residualY;
+            tracks.trackFiles[trkIdx].estPos[1] = tracks.trackFiles[trkIdx].predPos[1] + K[0][1] * residualX + K[1][1] * residualY;
+            tracks.trackFiles[trkIdx].estVel[0] = tracks.trackFiles[trkIdx].predVel[0] + K[0][2] * residualX + K[1][2] * residualY;
+            tracks.trackFiles[trkIdx].estVel[1] = tracks.trackFiles[trkIdx].predVel[0] + K[0][3] * residualX + K[1][3] * residualY;
 
-            // Compute the Estimated Covariance Values
-            MatrixXd IdentityMinusKH(4,4);
-            IdentityMinusKH = (Matrix4d::Identity() - tracks.trackFiles[trkIdx].K* H);
-            tracks.trackFiles[trkIdx].estCov = IdentityMinusKH * tracks.trackFiles[trkIdx].predCov * IdentityMinusKH.transpose() +
-                                                        tracks.trackFiles[trkIdx].K * R * tracks.trackFiles[trkIdx].K.transpose();
-            // print_matrixMatrix(tracks.trackFiles[trkIdx].estCov ,4 ,4);
+            // // Compute the Estimated Covariance Values
+            // COL 0
+            tracks.trackFiles[trkIdx].estCov[0][0] = (1 - K[0][0]) * tracks.trackFiles[trkIdx].predCov[0][0] +       K[1][0] * tracks.trackFiles[trkIdx].predCov[0][1];
+            tracks.trackFiles[trkIdx].estCov[0][1] = K[0][1]       * tracks.trackFiles[trkIdx].predCov[0][0] + (1 - K[1][1]) * tracks.trackFiles[trkIdx].predCov[0][1];
+            tracks.trackFiles[trkIdx].estCov[0][2] = K[0][2]       * tracks.trackFiles[trkIdx].predCov[0][0] +       K[1][2] * tracks.trackFiles[trkIdx].predCov[0][1] + tracks.trackFiles[trkIdx].predCov[0][2];
+            tracks.trackFiles[trkIdx].estCov[0][3] = K[0][3]       * tracks.trackFiles[trkIdx].predCov[0][0] +       K[1][3] * tracks.trackFiles[trkIdx].predCov[0][1] + tracks.trackFiles[trkIdx].predCov[0][3];
+
+            // COL 1
+            tracks.trackFiles[trkIdx].estCov[1][0] = (1 - K[0][0]) * tracks.trackFiles[trkIdx].predCov[1][0] +       K[1][0] * tracks.trackFiles[trkIdx].predCov[1][1];
+            tracks.trackFiles[trkIdx].estCov[1][1] = K[0][1]       * tracks.trackFiles[trkIdx].predCov[1][0] + (1 - K[1][1]) * tracks.trackFiles[trkIdx].predCov[1][1];
+            tracks.trackFiles[trkIdx].estCov[1][2] = K[0][2]       * tracks.trackFiles[trkIdx].predCov[1][0] +       K[1][2] * tracks.trackFiles[trkIdx].predCov[1][1] + tracks.trackFiles[trkIdx].predCov[1][2];
+            tracks.trackFiles[trkIdx].estCov[1][3] = K[0][3]       * tracks.trackFiles[trkIdx].predCov[1][0] +       K[1][3] * tracks.trackFiles[trkIdx].predCov[1][1] + tracks.trackFiles[trkIdx].predCov[1][3];
+
+            // COL 2
+            tracks.trackFiles[trkIdx].estCov[2][0] = (1 - K[0][0]) * tracks.trackFiles[trkIdx].predCov[2][0] +       K[1][0] * tracks.trackFiles[trkIdx].predCov[2][1];
+            tracks.trackFiles[trkIdx].estCov[2][1] = K[0][1]       * tracks.trackFiles[trkIdx].predCov[2][0] + (1 - K[1][1]) * tracks.trackFiles[trkIdx].predCov[2][1];
+            tracks.trackFiles[trkIdx].estCov[2][2] = K[0][2]       * tracks.trackFiles[trkIdx].predCov[2][0] +       K[1][2] * tracks.trackFiles[trkIdx].predCov[2][1] + tracks.trackFiles[trkIdx].predCov[2][2];
+            tracks.trackFiles[trkIdx].estCov[2][3] = K[0][3]       * tracks.trackFiles[trkIdx].predCov[2][0] +       K[1][3] * tracks.trackFiles[trkIdx].predCov[2][1] + tracks.trackFiles[trkIdx].predCov[2][3];
+
+            // COL 3
+            tracks.trackFiles[trkIdx].estCov[3][0] = (1 - K[0][0]) * tracks.trackFiles[trkIdx].predCov[3][0] +       K[1][0] * tracks.trackFiles[trkIdx].predCov[3][1];
+            tracks.trackFiles[trkIdx].estCov[3][1] = K[0][1]       * tracks.trackFiles[trkIdx].predCov[3][0] + (1 - K[1][1]) * tracks.trackFiles[trkIdx].predCov[3][1];
+            tracks.trackFiles[trkIdx].estCov[3][2] = K[0][2]       * tracks.trackFiles[trkIdx].predCov[3][0] +       K[1][2] * tracks.trackFiles[trkIdx].predCov[3][1] + tracks.trackFiles[trkIdx].predCov[3][2];
+            tracks.trackFiles[trkIdx].estCov[3][3] = K[0][3]       * tracks.trackFiles[trkIdx].predCov[3][0] +       K[1][3] * tracks.trackFiles[trkIdx].predCov[3][1] + tracks.trackFiles[trkIdx].predCov[3][3];
         }
     }
        
@@ -143,7 +204,7 @@ void TrackFileMgr::checkPersistency(TrackFile &tracks)
         // else if (tracks.trackFiles[track].state == CONVERGED)
         // {
 
-        // }
+        // }predPos
         // else
         // {
 
@@ -171,11 +232,16 @@ void TrackFileMgr::attemptOpenTracks(TrackFile &tracks, DetList &dets)
                     tracks.trackFiles[track].predPos[0] = dets.detList[det].pos[0];
                     tracks.trackFiles[track].predPos[1] = dets.detList[det].pos[1];
 
-                    tracks.trackFiles[track].predCov(0,0) = 5.0;
-                    tracks.trackFiles[track].predCov(1,1) = 1.0;
+                    tracks.trackFiles[track].predVel[0] = 0.0;
+                    tracks.trackFiles[track].predVel[1] = 0.0;
+                    tracks.trackFiles[track].estVel[0] = 0.0;
+                    tracks.trackFiles[track].estVel[1] = 0.0;
 
-                    tracks.trackFiles[track].estCov(0,0) = 5.0;
-                    tracks.trackFiles[track].estCov(1,1) = 1.0;
+                    tracks.trackFiles[track].predCov[0][0] = 5.0;
+                    tracks.trackFiles[track].predCov[1][1] = 1.0;
+
+                    tracks.trackFiles[track].estCov[0][0] = 5.0;
+                    tracks.trackFiles[track].estCov[1][1] = 1.0;
 
                     tracks.numTracks++;
                     break;

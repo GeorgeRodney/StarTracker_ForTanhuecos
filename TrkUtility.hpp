@@ -11,6 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include <Eigen/Dense>
+#include <math.h>
 
 using namespace Eigen;
 
@@ -44,14 +45,15 @@ public:
     bool correlated;
     int corrTrack;
     int valid = INVALID_DET;
-    MatrixXd measCov = Matrix2d::Zero();
+    vector<vector<double>> measCov;
 
     Detection() :   pos(DEGREE, 0.0), 
                     correlated(false), 
-                    corrTrack(-1)
+                    corrTrack(-1),
+                    measCov(2, vector<double>(2, 0.0))
     {
-        measCov(0,0) = STD_MEAS*STD_MEAS;
-        measCov(1,1) = STD_MEAS*STD_MEAS;
+        measCov[0][0] = STD_MEAS*STD_MEAS;
+        measCov[1][1] = STD_MEAS*STD_MEAS;
     };
 
     void clearDet()
@@ -67,42 +69,60 @@ public:
 class Track
 {
 public:
-    vector<double> vel;
+    vector<double> predVel;
+    vector<double> estVel;
     vector<double> predPos;
     vector<double> estPos;
-    MatrixXd predCov = Matrix4d::Zero();
-    MatrixXd estCov = Matrix4d::Zero();
-    MatrixXd K = Matrix4d::Zero();
+    vector<vector<double>> predCov;
+    vector<vector<double>> estCov;
+    vector<vector<double>> K;
+    vector<vector<double>> H;
     int corrDet = -1;
     TrackState state = CLOSED;
     uint8_t persistance = 0;
-    Track() :   predPos(DEGREE,0.0),   
-                vel(DEGREE, 0.0),
-                estPos(DEGREE,0.0)
+    double gate;
+    Track() :   predVel(DEGREE,0.0),   
+                estVel(DEGREE, 0.0),
+                predPos(DEGREE,0.0),
+                estPos(DEGREE,0.0),
+                predCov(4, vector<double>(4, 0.0)),
+                estCov(4, vector<double>(4, 0.0)),
+                gate(5.0),
+                K(4, vector<double>(2, 0.0)),
+                H(2, vector<double>(4, 0.0))
     {
-        predCov(0,0) = STD_POS*STD_POS;
-        predCov(1,1) = STD_POS*STD_POS;
-        predCov(2,2) = STD_VEL*STD_VEL;
-        predCov(3,3) = STD_VEL*STD_VEL;
+        predCov[0][0] = STD_POS*STD_POS;
+        predCov[1][1] = STD_POS*STD_POS;
+        predCov[2][2] = STD_VEL*STD_VEL;
+        predCov[3][3] = STD_VEL*STD_VEL;
 
-        estCov(0,0) = STD_POS*STD_POS;
-        estCov(1,1) = STD_POS*STD_POS;
-        estCov(2,2) = STD_VEL*STD_VEL;
-        estCov(3,3) = STD_VEL*STD_VEL;
+        estCov[0][0] = STD_POS*STD_POS;
+        estCov[1][1] = STD_POS*STD_POS;
+        estCov[2][2] = STD_VEL*STD_VEL;
+        estCov[3][3] = STD_VEL*STD_VEL;
+
+        H[0][0] = 1.0;
+        H[1][0] = 1.0;
     };
 
     // Reset function
     void reset()
     {
-        vel.clear();
+        predVel.clear();
+        estVel.clear();
         predPos.clear();
         estPos.clear();
-        predCov = Matrix4d::Zero();
-        estCov = Matrix4d::Zero();
-        K      = Matrix4d::Zero();
+
+        for (int8_t i = 0; i < 4; i++)
+        {
+            predCov[i].clear();
+            estCov[i].clear();
+        }
+
         corrDet = -1;
-        state = CLOSED;
+        state   = CLOSED;
         persistance = 0;
+        gate    = 5.0;
     }
     
     void cleanCorrelated()
@@ -137,6 +157,20 @@ inline double euclidean(int trk, TrackFile track, int det, DetList detection)
                     pow(track.trackFiles[trk].estPos[0] - detection.detList[det].pos[0], 2));
 }
 
+inline double statisticalDifferance(int trk, TrackFile track, int det, DetList detection)
+{
+    vector<vector<double>> S_inv(2, vector<double>(2, 0.0));
+    S_inv[0][0] = 1 / (track.trackFiles[trk].predCov[0][0] + detection.detList[det].measCov[0][0]);
+    S_inv[1][1] = 1 / (track.trackFiles[trk].predCov[1][1] + detection.detList[det].measCov[1][1]);
+
+    double deltaX = track.trackFiles[trk].predPos[0] - detection.detList[det].pos[0];
+    double deltaY = track.trackFiles[trk].predPos[1] - detection.detList[det].pos[1];
+    
+    double output = deltaX* deltaX * S_inv[0][0] + deltaY * deltaY * S_inv[1][1];
+    return output;
+
+}
+
 template <typename T>
 void print_state(vector<T> &state)
 {
@@ -157,7 +191,8 @@ inline Detection update_pos(Detection det, vector<double> vel, double dt)
     return det;
 }
 
-inline void print_matrix(vector<vector<double>> &matrix, int DET_SIZE, int TRACK_SIZE)
+template <typename T>
+inline void print_matrix(vector<vector<T>> &matrix, int DET_SIZE, int TRACK_SIZE)
 {
     std::cout << "TRACKS" << " X "<< "DETECTIONS" << endl;
     for (int track = 0; track < TRACK_SIZE; track++)
@@ -165,21 +200,6 @@ inline void print_matrix(vector<vector<double>> &matrix, int DET_SIZE, int TRACK
         for (int det = 0; det < DET_SIZE; det++)
         {
             std::cout << setw(2) << matrix[track][det] << ", ";
-        }   
-
-         std::cout << endl;
-    }
-    std::cout << endl;
-}
-
-inline void print_matrixMatrix(MatrixXd matrix, int DET_SIZE, int TRACK_SIZE)
-{
-    std::cout << "TRACKS" << " X MatrixXd"<< "DETECTIONS" << endl;
-    for (int track = 0; track < TRACK_SIZE; track++)
-    {
-        for (int det = 0; det < DET_SIZE; det++)
-        {
-            std::cout << setw(2) << matrix(track, det) << ", ";
         }   
 
          std::cout << endl;

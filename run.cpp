@@ -98,8 +98,9 @@ int main()
         >----------------------------------------------------------------------------
         */
         cout << endl;
-        tracker_.hungarianAssociate(dets, tracks, state, dets.numDets, tracks.numTracks);
-        print_state(state);
+        tracker_.correlateDetsAndTracks(tracks, dets);
+        // tracker_.hungarianAssociate(dets, tracks, state, dets.numDets, tracks.numTracks);
+        // print_state(state);
 
         /*>----------------------------------------------------------------------------
         |
