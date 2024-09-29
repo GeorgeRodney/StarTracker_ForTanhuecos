@@ -18,9 +18,9 @@ int main()
     vector<int> state(STATE_MAX, -1);
     int frame;
 
-    vector<double> xHold(DET_MAX, -1);
-    vector<double> yHold(DET_MAX, -1);
-    vector<double> frameHold(DET_MAX, -1);
+    vector<double> xHold(200, -1);
+    vector<double> yHold(200, -1);
+    vector<double> frameHold(200, -1);
 
     int idx = 0;
     int numFrames = -1;
@@ -83,11 +83,20 @@ int main()
         /*
         >----------------------------------------------------------------------------
         |
+        |   .  INIT VARS
+        |
+        >----------------------------------------------------------------------------
+        */
+        tracker_.updateFrameVariables(tracks, dets);
+
+        /*
+        >----------------------------------------------------------------------------
+        |
         |   1.  Predict track location
         |
         >----------------------------------------------------------------------------
         */
-        tracker_.predictTrackLocation(tracks, dt);
+        tracker_.predictTrackLocationAndGate(tracks, dt);
 
         /*
         >----------------------------------------------------------------------------

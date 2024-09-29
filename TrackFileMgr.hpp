@@ -10,7 +10,8 @@ public:
 
     uint16_t m_frame;
 
-    void predictTrackLocation(TrackFile tracks, double dt);
+    void updateFrameVariables(TrackFile &tracks, DetList &dets);
+    void predictTrackLocationAndGate(TrackFile tracks, double dt);
     void updateTrackEstPosition(TrackFile &tracks, DetList &dets);
     void correctTrackState(TrackFile tracks, double dt);
     void checkPersistency(TrackFile &tracks);
@@ -25,7 +26,8 @@ public:
                             TrackFile     &tracks,
                             std::vector<int>       &state,
                             int DET_SIZE,
-                            int TRACK_SIZE
+                            int TRACK_SIZE,
+                            vector<vector<double>> &gatedMatrix
                             );
 
     void auctionAssociate(

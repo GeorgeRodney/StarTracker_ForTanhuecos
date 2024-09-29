@@ -44,12 +44,13 @@ public:
     vector<double> pos;
     bool correlated;
     int corrTrack;
-    int valid = INVALID_DET;
+    int valid;
     vector<vector<double>> measCov;
 
-    Detection() :   pos(DEGREE, 0.0), 
+    Detection():    pos(DEGREE, 0.0), 
                     correlated(false), 
                     corrTrack(-1),
+                    valid(INVALID_DET),
                     measCov(2, vector<double>(2, 0.0))
     {
         measCov[0][0] = STD_MEAS*STD_MEAS;
@@ -81,7 +82,7 @@ public:
     TrackState state = CLOSED;
     uint8_t persistance = 0;
     double gate;
-    Track() :   predVel(DEGREE,0.0),   
+    Track():    predVel(DEGREE,0.0),   
                 estVel(DEGREE, 0.0),
                 predPos(DEGREE,0.0),
                 estPos(DEGREE,0.0),
@@ -108,15 +109,15 @@ public:
     // Reset function
     void reset()
     {
-        predVel.clear();
-        estVel.clear();
-        predPos.clear();
-        estPos.clear();
+        predVel = {0.0, 0.0};
+        estVel  = {0.0 ,0.0};
+        predPos = {0.0, 0.0};
+        estPos  = {0.0, 0.0};
 
         for (int8_t i = 0; i < 4; i++)
         {
-            predCov[i].clear();
-            estCov[i].clear();
+            predCov[i] = {0.0, 0.0, 0.0, 0.0};
+            estCov[i] = {0.0, 0.0, 0.0, 0.0};
         }
 
         corrDet = -1;
@@ -138,7 +139,11 @@ class DetList
     public:
     vector<Detection> detList;
     int numDets = 0;
-    DetList(): detList(DET_MAX){};
+    int numUncorrDets;
+
+    DetList():  detList(DET_MAX),
+                numUncorrDets(0)
+    {};
 
 };
 
@@ -194,7 +199,6 @@ inline Detection update_pos(Detection det, vector<double> vel, double dt)
 template <typename T>
 inline void print_matrix(vector<vector<T>> &matrix, int DET_SIZE, int TRACK_SIZE)
 {
-    std::cout << "TRACKS" << " X "<< "DETECTIONS" << endl;
     for (int track = 0; track < TRACK_SIZE; track++)
     {
         for (int det = 0; det < DET_SIZE; det++)

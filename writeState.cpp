@@ -21,11 +21,11 @@ int main ()
 
     // Calculate the false alarm rate3
     int REAL_DETS       = 1;
-    int FALSE_DETS      = 3;
+    int FALSE_DETS      = 10;
     double false_rate   = FALSE_DETS / (FPA * FPA);
     int DET_SIZE        = REAL_DETS + FALSE_DETS;
     vector<Detection>   dets(DET_SIZE);
-    int FRAMES          = 5;
+    int FRAMES          = 10;
     int TARGET = 0;
 
     // Originial Target
