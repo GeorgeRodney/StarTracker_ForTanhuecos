@@ -132,7 +132,7 @@ int main()
             if (tracks.trackFiles[track].state != CLOSED)
             {
                 std::cout << "Track: " << track << ". Correlated?: " << tracks.trackFiles[track].corrDet << ". Status: " << tracks.trackFiles[track].state 
-                    << ". Estimated Position: " << tracks.trackFiles[track].estPos[0] << ". " << tracks.trackFiles[track].estPos[1] << std::endl;
+                    << ". Estimated Position: " << tracks.trackFiles[track].estPos[0] << ". " << tracks.trackFiles[track].estPos[1] << ". Estimated Vel " << tracks.trackFiles[track].estVel[0] << ". " << tracks.trackFiles[track].estVel[1] << std::endl;
             }
             
         }

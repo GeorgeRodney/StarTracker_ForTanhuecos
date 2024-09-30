@@ -208,8 +208,8 @@ void TrackFileMgr::updateTrackEstPosition(TrackFile &tracks, DetList &dets)
             vector<vector<double>> K(2 , vector<double>(4, 0.0));
             K[0][0] = HPH_tPlusR[0][0] * tracks.trackFiles[trkIdx].predCov[0][0];
             K[0][1] = HPH_tPlusR[0][0] * tracks.trackFiles[trkIdx].predCov[0][1];
-            K[0][1] = HPH_tPlusR[0][0] * tracks.trackFiles[trkIdx].predCov[0][2];
-            K[0][1] = HPH_tPlusR[0][0] * tracks.trackFiles[trkIdx].predCov[0][3];
+            K[0][2] = HPH_tPlusR[0][0] * tracks.trackFiles[trkIdx].predCov[0][2];
+            K[0][3] = HPH_tPlusR[0][0] * tracks.trackFiles[trkIdx].predCov[0][3];
 
             K[1][0] = HPH_tPlusR[1][1] * tracks.trackFiles[trkIdx].predCov[1][0];
             K[1][1] = HPH_tPlusR[1][1] * tracks.trackFiles[trkIdx].predCov[1][1];
