@@ -19,21 +19,18 @@ public:
     void attemptOpenTracks(TrackFile &tracks, DetList &dets);
     void updateTrackVariables(TrackFile &tracks, DetList &dets);
 
-    void correlateDetsAndTracks(TrackFile &tracks, DetList &dets);
+    void binningAssociate(TrackFile &tracks, DetList &dets);
     
     void hungarianAssociate(
                             DetList &dets,
                             TrackFile     &tracks,
-                            std::vector<int>       &state,
                             int DET_SIZE,
-                            int TRACK_SIZE,
-                            vector<vector<double>> &gatedMatrix
+                            int TRACK_SIZE
                             );
 
     void auctionAssociate(
                             DetList &dets,
                             TrackFile     &tracks,
-                            std::vector<int>       &state,
                             int DET_SIZE,
                             int TRACK_SIZE
                             );

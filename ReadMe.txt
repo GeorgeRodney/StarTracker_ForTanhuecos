@@ -15,3 +15,4 @@ Correct Step:
 TODO LIST
     [ ] Add gating scheme to tracks
     [ ] Fix infinty loop in AUCTION ALGORITHM
+    [ ] Hungarian Algorithm isnt excluding unlikely associations. Debug this.

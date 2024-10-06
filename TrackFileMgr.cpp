@@ -83,7 +83,7 @@ void TrackFileMgr::predictTrackLocationAndGate(TrackFile tracks, double dt)
     }
 }
 
-void TrackFileMgr::correlateDetsAndTracks(TrackFile &tracks, DetList &dets)
+void TrackFileMgr::binningAssociate(TrackFile &tracks, DetList &dets)
 {
     vector<int> state(STATE_MAX, -1); // Index is Det. Value is Track
     vector<vector<int>> tracksToDets(tracks.numTracks, vector<int>(dets.numDets, -1));
@@ -135,13 +135,6 @@ void TrackFileMgr::correlateDetsAndTracks(TrackFile &tracks, DetList &dets)
         }
     }
 
-    // std::cout << "TracksToDets" << std::endl;
-    // print_matrix(tracksToDets, 5, 5);
-    // std::cout << std::endl;
-    // std::cout << "DetsToTracks" << std::endl;
-    // print_matrix(detsToTracks, 5, 5);
-    // std::cout << std::endl;
-
     // ASSOCIATE
     for(int16_t trackIdx = 0; trackIdx < TRACK_MAX; trackIdx++)
     {   
@@ -180,15 +173,6 @@ void TrackFileMgr::correlateDetsAndTracks(TrackFile &tracks, DetList &dets)
             trackHits[trackIdx] = 0; // Clear trackHits
         }
     }
-
-    // std::cout << "TracksToDets" << std::endl;
-    // print_matrix(tracksToDets, 5, 5);
-    // std::cout << std::endl;
-    // std::cout << "DetsToTracks" << std::endl;
-    // print_matrix(detsToTracks, 5, 5);
-    // std::cout << std::endl;
-
-    // hungarianAssociate(dets, tracks, state, dets.numDets, tracks.numTracks,possibleMatches);
 }
 
 void TrackFileMgr::updateTrackEstPosition(TrackFile &tracks, DetList &dets)
@@ -375,10 +359,8 @@ void TrackFileMgr::correctTrackState(TrackFile tracks, double dt)
 
 void TrackFileMgr::hungarianAssociate(  DetList &dets,
                                         TrackFile &tracks,
-                                        vector<int> &state,
                                         int DET_SIZE,
-                                        int TRACK_SIZE,
-                                        vector<vector<double>> &gatedMatrix
+                                        int TRACK_SIZE
                                         )
 {
     if ((tracks.numTracks == 0) || (dets.numDets == 0))
@@ -396,6 +378,7 @@ void TrackFileMgr::hungarianAssociate(  DetList &dets,
     {
         TERMINATE = TRACK_SIZE;
     }
+    vector<int>             state(STATE_MAX, -1);
     int assoc               = 0;
     vector<int>             zeros_row(DET_SIZE, 0);
     vector<int>             zeros_col(TRACK_SIZE, 0);
@@ -417,7 +400,15 @@ void TrackFileMgr::hungarianAssociate(  DetList &dets,
     {
         for (int det = 0; det < DET_SIZE; det++)
         {
-            cost_matrix[trk][det] = euclidean(trk, tracks, det, dets);
+            double cost = euclidean(trk, tracks, det, dets);
+            if (cost <= 25) 
+            {
+                cost_matrix[trk][det] = cost;
+            }
+            else
+            {
+                cost_matrix[trk][det] = 1000;
+            }
         }
     }
 
@@ -597,7 +588,14 @@ void TrackFileMgr::hungarianAssociate(  DetList &dets,
     {
         if (state[det] != -1)
         {
-            tracks.trackFiles[state[det]].corrDet = det;
+            if (cost_matrix[state[det]][det] < 25)
+            {
+                tracks.trackFiles[state[det]].corrDet = det;
+            }
+            else
+            {
+                tracks.trackFiles[state[det]].corrDet = -1;
+            }
         }
     }
 
@@ -618,7 +616,6 @@ void TrackFileMgr::hungarianAssociate(  DetList &dets,
 
 void TrackFileMgr::auctionAssociate(DetList &dets,
                                     TrackFile     &tracks,
-                                    vector<int>       &state,
                                     int DET_SIZE,
                                     int TRACK_SIZE
                                     )
@@ -635,6 +632,7 @@ void TrackFileMgr::auctionAssociate(DetList &dets,
     int iterations = 1;
     double epsilon = 0.2;
 
+    vector<int>             state(STATE_MAX, -1);
     vector<vector<double>>  cost_matrix(TRACK_SIZE, vector<double>(DET_SIZE, -1.0));
     vector<vector<double>>  OG_cost_matrix(STATE_MAX, vector<double>(STATE_MAX, -1.0));
     vector<int>             indexes(DET_SIZE);

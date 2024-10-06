@@ -15,9 +15,7 @@ int main()
         return 1;
     }
 
-    vector<int> state(STATE_MAX, -1);
     int frame;
-
     vector<double> xHold(200, -1);
     vector<double> yHold(200, -1);
     vector<double> frameHold(200, -1);
@@ -107,8 +105,8 @@ int main()
         >----------------------------------------------------------------------------
         */
         cout << endl;
-        tracker_.correlateDetsAndTracks(tracks, dets);
-        // tracker_.hungarianAssociate(dets, tracks, state, dets.numDets, tracks.numTracks);
+        // tracker_.binningAssociate(tracks, dets);
+        tracker_.hungarianAssociate(dets, tracks, dets.numDets, tracks.numTracks);
         // print_state(state);
 
         /*>----------------------------------------------------------------------------
