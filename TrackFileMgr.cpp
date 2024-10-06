@@ -588,7 +588,7 @@ void TrackFileMgr::hungarianAssociate(  DetList &dets,
     {
         if (state[det] != -1)
         {
-            if (cost_matrix[state[det]][det] < 25)
+            if (OG_cost_matrix[state[det]][det] < 25)
             {
                 tracks.trackFiles[state[det]].corrDet = det;
             }

@@ -13,6 +13,8 @@ Correct Step:
     Estimate the tracks state with an update to the estimated position and vel given a state update equation.
 
 TODO LIST
-    [ ] Add gating scheme to tracks
-    [ ] Fix infinty loop in AUCTION ALGORITHM
-    [ ] Hungarian Algorithm isnt excluding unlikely associations. Debug this.
+    [] Add gating scheme to tracks
+    [] Fix infinty loop in AUCTION ALGORITHM
+    [X] Hungarian Algorithm isnt excluding unlikely associations. Debug this.
+    [] Velocity isnt being filtered into state estimation 
+    
