@@ -106,7 +106,7 @@ int main()
         */
         cout << endl;
         // tracker_.binningAssociate(tracks, dets);
-        tracker_.hungarianAssociate(dets, tracks, dets.numDets, tracks.numTracks);
+        tracker_.hungarianAssociate(dets, tracks);
         // print_state(state);
 
         /*>----------------------------------------------------------------------------

@@ -1,39 +1,18 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include "TrkUtility.hpp"
+#include "TrackFileMgr.hpp"
 
-using namespace std;
-
-int main ()
+void TrackFileMgr::hungarianAssociate(  DetList &dets,
+                                        TrackFile &tracks
+                                        )
 {
-    ifstream detections("detections.ods");
-
-    if (!detections.is_open())
+    // DONT RUN IF THERE IS NOTHING TO DO
+    if ((tracks.numTracks == 0) || (dets.numDets == 0))
     {
-        std::cerr << "Error opening file for writing." << std::endl;
-        return 1;
+        return;
     }
 
-    const int STATE_MAX = 200;
-    int frame;
-    const int DET_MAX = STATE_MAX;
-    const int TRACK_MAX = STATE_MAX;
+    int DET_SIZE = dets.numDets;
+    int TRACK_SIZE = tracks.numTracks;
 
-    vector<int> xHold(DET_MAX, -1);
-    vector<int> yHold(DET_MAX, -1);
-    vector<int> frameHold(DET_MAX, -1);
-    int idx = 0;
-
-    while(detections >> frame)
-    {   
-        frameHold[idx] = frame;
-        detections >> xHold[idx] >> yHold[idx];
-        idx++;
-    }
-    
-    int DET_SIZE            =  idx;
-    int TRACK_SIZE          =  7;
     int TERMINATE;
 
     if (DET_SIZE <= TRACK_SIZE)
@@ -44,16 +23,13 @@ int main ()
     {
         TERMINATE = TRACK_SIZE;
     }
-
-    int assoc               = 0;
     vector<int>             state(STATE_MAX, -1);
+    int assoc               = 0;
     vector<int>             zeros_row(DET_SIZE, 0);
     vector<int>             zeros_col(TRACK_SIZE, 0);
-    vector<vector<double>>  cost_matrix(STATE_MAX, vector<double>(STATE_MAX, 0.0));
-    vector<vector<double>>  OG_cost_matrix(STATE_MAX, vector<double>(STATE_MAX, 0.0));
-    vector<vector<int>>     double_covered(STATE_MAX, vector<int>(STATE_MAX, 0.0));
-    vector<Detection>       dets(DET_SIZE);
-    vector<Track>           tracks(TRACK_SIZE);
+    vector<vector<double>>  cost_matrix(TRACK_SIZE, vector<double>(DET_SIZE, 0.0));
+    vector<vector<double>>  OG_cost_matrix(TRACK_SIZE, vector<double>(DET_SIZE, 0.0));
+    vector<vector<int>>     double_covered(TRACK_SIZE, vector<int>(DET_SIZE, 0.0));
     vector<bool>            rowCovered(TRACK_SIZE,false);
     vector<bool>            colCovered(DET_SIZE, false);
     vector<int>             zerosRow(TRACK_SIZE, 0);
@@ -64,47 +40,37 @@ int main ()
     vector<int>             idxCol(DET_SIZE, 0);
     double                  smallestVal;
 
-    // Assign DETECTIONS from input file
-    for (int det = 0; det < DET_SIZE; det++)
-    {
-        dets[det].x = xHold[det];
-        dets[det].y = yHold[det];
-
-        //  std::cout << dets[det].x << " " << dets[det].y << endl;
-    }
-
-    tracks[0].x = 105; tracks[0].y = 100;
-    tracks[1].x = 205; tracks[1].y = 200;
-    tracks[2].x = 300; tracks[2].y = 305;
-    tracks[3].x = 75;   tracks[3].y = 110;
-    tracks[4].x = 456;  tracks[4].y = 234;
-    tracks[5].x = 234;  tracks[5].y = 23;
-    tracks[6].x = 35;   tracks[6].y = 274;
-
+    // GENERATE COST MATRIX
     for (int trk = 0; trk < TRACK_SIZE; trk++)
     {
         for (int det = 0; det < DET_SIZE; det++)
         {
-            cost_matrix[trk][det] = euclidean(det, trk, dets, tracks);
+            double cost = euclidean(trk, tracks, det, dets);
+            if (cost <= 25) 
+            {
+                cost_matrix[trk][det] = cost;
+            }
+            else
+            {
+                cost_matrix[trk][det] = 1000;
+            }
         }
     }
 
     OG_cost_matrix = cost_matrix;
-    print_matrix(cost_matrix, DET_SIZE, TRACK_SIZE);
-     std::cout << endl;
-
+    // print_matrix(cost_matrix, DET_SIZE, TRACK_SIZE);
+    //  std::cout << endl;
     // COL reduction
     col_reduce(cost_matrix, DET_SIZE, TRACK_SIZE);
-     std::cout << endl;
-    print_matrix(cost_matrix, DET_SIZE, TRACK_SIZE);
-
+    //  std::cout << endl;
+    // print_matrix(cost_matrix, DET_SIZE, TRACK_SIZE);
     // ROW reduction
     row_reduce(cost_matrix, DET_SIZE, TRACK_SIZE);
-     std::cout << endl;
-    print_matrix(cost_matrix, DET_SIZE, TRACK_SIZE);
-     std::cout << endl;
+    //  std::cout << endl;
+    // print_matrix(cost_matrix, DET_SIZE, TRACK_SIZE);
+    //  std::cout << endl;
 
-    // Track the rows and cols with the largest number of zeros
+     // Track the rows and cols with the largest number of zeros
     for (int track = 0; track < TRACK_SIZE; track++)
     {
         for (int det = 0; det < DET_SIZE; det++)
@@ -129,7 +95,7 @@ int main ()
 
     // print_state(rowCovered);
     // print_state(colCovered);
-     std::cout << "A: Lines: " << lines << endl;
+    //  std::cout << "A: Lines: " << lines << endl;
     // int iterations = 0;
 
     while (lines < TERMINATE)
@@ -154,7 +120,7 @@ int main ()
         // // Sort and find the smallest remaining uncovered number
         bubbleSortSmall(sortArray, idxSort);
         smallestVal = sortArray[0];
-         std::cout << "C: Smalles Val: " << smallestVal << endl;
+        //  std::cout << "C: Smalles Val: " << smallestVal << endl;
 
         for (int track = 0; track < TRACK_SIZE; track++)
         {  
@@ -166,8 +132,8 @@ int main ()
                 }
             }
         }   
-         std::cout << "D: " << endl;
-        print_matrix(cost_matrix, DET_SIZE, TRACK_SIZE);
+        //  std::cout << "D: " << endl;
+        // print_matrix(cost_matrix, DET_SIZE, TRACK_SIZE);
 
         // Add the smallest value to numbers covered by two lines
         // First discover those numbers
@@ -248,17 +214,33 @@ int main ()
         }
     }   
 
-    std::cout << endl;
-    print_state(state);
-    // print_state(zerosCol);
-
-    // print unassociated dets
-    std::cout << "Unassociated detections: " << endl;
+    // Label detections as correlated or not
     for (int det = 0; det < DET_SIZE; det++)
     {
-        if(state[det] == -1)
+        if(state[det] != -1)
         {
-            std::cout << det << endl;
+            dets.detList[det].correlated = true;
+            dets.detList[det].corrTrack = state[det];
+        }
+        else
+        {
+            dets.detList[det].correlated = false;
+            dets.detList[det].corrTrack = state[det];
+        }
+    }
+    // Label Tracks as correlated or not
+    for (int det = 0; det < DET_SIZE; det++)
+    {
+        if (state[det] != -1)
+        {
+            if (OG_cost_matrix[state[det]][det] < 25)
+            {
+                tracks.trackFiles[state[det]].corrDet = det;
+            }
+            else
+            {
+                tracks.trackFiles[state[det]].corrDet = -1;
+            }
         }
     }
 
@@ -275,5 +257,4 @@ int main ()
 
     cout << "Cost: " << cost << endl;
 
-    return 0;
 }

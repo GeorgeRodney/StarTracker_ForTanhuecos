@@ -18,3 +18,4 @@ TODO LIST
     [X] Hungarian Algorithm isnt excluding unlikely associations. Debug this.
     [] Velocity isnt being filtered into state estimation 
     [] Create visualization tool with python
+    [] Make the dets and tracks structure a member variable for the TFM

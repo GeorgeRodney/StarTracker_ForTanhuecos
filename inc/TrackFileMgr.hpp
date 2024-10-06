@@ -23,16 +23,12 @@ public:
     
     void hungarianAssociate(
                             DetList &dets,
-                            TrackFile     &tracks,
-                            int DET_SIZE,
-                            int TRACK_SIZE
+                            TrackFile &tracks
                             );
 
     void auctionAssociate(
                             DetList &dets,
-                            TrackFile     &tracks,
-                            int DET_SIZE,
-                            int TRACK_SIZE
+                            TrackFile &tracks
                             );
 
 };
