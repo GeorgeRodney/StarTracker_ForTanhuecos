@@ -17,4 +17,4 @@ TODO LIST
     [] Fix infinty loop in AUCTION ALGORITHM
     [X] Hungarian Algorithm isnt excluding unlikely associations. Debug this.
     [] Velocity isnt being filtered into state estimation 
-    
+    [] Create visualization tool with python
