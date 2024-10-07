@@ -254,7 +254,7 @@ void TrackFileMgr::frameCleanUp()
 
 void TrackFileMgr::updateTrackVariables()
 {   
-        TrackFileMgr::checkPersistency();
+    TrackFileMgr::checkPersistency();
 
     TrackFileMgr::attemptOpenTracks();
 }

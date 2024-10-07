@@ -101,10 +101,8 @@ int main()
         |
         >----------------------------------------------------------------------------
         */
-        cout << endl;
-        // tracker_.binningAssociate(tracker_.m_tracks, dets);
+        // tracker_.binningAssociate();
         tracker_.hungarianAssociate();
-        // print_state(state);
 
         /*>----------------------------------------------------------------------------
         |
@@ -113,6 +111,17 @@ int main()
         >----------------------------------------------------------------------------*/
         tracker_.updateTrackEstPosition();
 
+        // FRAME STATE
+        for (int det = 0; det < tracker_.m_dets.numDets; det++)
+        {
+            std::cout << tracker_.m_frame << "," << 0 << "," << tracker_.m_dets.detList[det].pos[0] << "," << tracker_.m_dets.detList[det].pos[1] << std::endl;
+        }
+
+        for (int track = 0; track < tracker_.m_tracks.numTracks; track++)
+        {
+            std::cout << tracker_.m_frame << "," << 1 << "," << tracker_.m_tracks.trackFiles[track].estPos[0] << "," << tracker_.m_tracks.trackFiles[track].estPos[1] << std::endl;
+        }
+
         /*>----------------------------------------------------------------------------
         |
         |   4.  Birth and Decay Track Files
@@ -120,17 +129,7 @@ int main()
         >----------------------------------------------------------------------------*/
         tracker_.updateTrackVariables();
 
-        // FRAME STATE
-        std::cout << "Frame: " << tracker_.m_frame++ << std::endl;
-        for (int track = 0; track < 20; track++)
-        {
-            // if (tracker_.m_tracks.trackFiles[track].state != CLOSED)
-            // {
-                std::cout << "Track: " << track << ". Correlated?: " << tracker_.m_tracks.trackFiles[track].corrDet << ". Status: " << tracker_.m_tracks.trackFiles[track].state 
-                    << ". Estimated Position: " << tracker_.m_tracks.trackFiles[track].estPos[0] << ". " << tracker_.m_tracks.trackFiles[track].estPos[1] << ". Estimated Vel " << tracker_.m_tracks.trackFiles[track].estVel[0] << ". " << tracker_.m_tracks.trackFiles[track].estVel[1] << std::endl;
-            // }
-            
-        }
+        tracker_.m_frame++;
 
         /*>----------------------------------------------------------------------------
         |

@@ -253,6 +253,4 @@ void TrackFileMgr::hungarianAssociate()
         }
     }
 
-    cout << "Cost: " << cost << endl;
-
 }
