@@ -1,10 +1,10 @@
 #include "TrackFileMgr.hpp"
 
-void TrackFileMgr::binningAssociate(TrackFile &tracks, DetList &dets)
+void TrackFileMgr::binningAssociate()
 {
     vector<int> state(STATE_MAX, -1); // Index is Det. Value is Track
-    vector<vector<int>> tracksToDets(tracks.numTracks, vector<int>(dets.numDets, -1));
-    vector<vector<int>> detsToTracks(dets.numDets, vector<int>(tracks.numTracks, -1));
+    vector<vector<int>> tracksToDets(m_tracks.numTracks, vector<int>(m_dets.numDets, -1));
+    vector<vector<int>> detsToTracks(m_dets.numDets, vector<int>(m_tracks.numTracks, -1));
     vector<int> trackHits(TRACK_MAX, 0);
     vector<int> detHits(DET_MAX, 0);
     int trkHitIdx = 0;
@@ -14,16 +14,16 @@ void TrackFileMgr::binningAssociate(TrackFile &tracks, DetList &dets)
     double minVal = 100000.0;
     int minValIdx = -1;
 
-    // Gate the tracks
-    for(int16_t trackIdx = 0; trackIdx < tracks.numTracks; trackIdx++)
+    // Gate the m_tracks
+    for(int16_t trackIdx = 0; trackIdx < m_tracks.numTracks; trackIdx++)
     {
-        for (int16_t detIdx = 0; detIdx < dets.numDets; detIdx++)
+        for (int16_t detIdx = 0; detIdx < m_dets.numDets; detIdx++)
         {
-            if (tracks.trackFiles[trackIdx].state != CLOSED)
+            if (m_tracks.trackFiles[trackIdx].state != CLOSED)
             {
                 // CALCULATE GATE
-                double diff = statisticalDifferance(trackIdx, tracks, detIdx, dets);
-                if (diff < tracks.trackFiles[trackIdx].gate)
+                double diff = statisticalDifferance(trackIdx, m_tracks, detIdx, m_dets);
+                if (diff < m_tracks.trackFiles[trackIdx].gate)
                 {
                     // Store track stuff
                     trackHits[trackIdx]++;
@@ -55,12 +55,12 @@ void TrackFileMgr::binningAssociate(TrackFile &tracks, DetList &dets)
     // ASSOCIATE
     for(int16_t trackIdx = 0; trackIdx < TRACK_MAX; trackIdx++)
     {   
-        // Associate the tracks with one detection in their gate
+        // Associate the m_tracks with one detection in their gate
         if(trackHits[trackIdx] == 1)
         {
-            tracks.trackFiles[trackIdx].corrDet = tracksToDets[trackIdx][0];
-            dets.detList[tracks.trackFiles[trackIdx].corrDet].correlated = true;
-            dets.detList[tracks.trackFiles[trackIdx].corrDet].corrTrack = trackIdx;
+            m_tracks.trackFiles[trackIdx].corrDet = tracksToDets[trackIdx][0];
+            m_dets.detList[m_tracks.trackFiles[trackIdx].corrDet].correlated = true;
+            m_dets.detList[m_tracks.trackFiles[trackIdx].corrDet].corrTrack = trackIdx;
 
             // Remove from lists
             trackHits[trackIdx] = 0;
@@ -75,7 +75,7 @@ void TrackFileMgr::binningAssociate(TrackFile &tracks, DetList &dets)
             {
                 int detectionToTest = tracksToDets[trackIdx][idx];
                 tracksToDets[trackIdx][idx] = -1; // Clear the detection out
-                cost = statisticalDifferance(trackIdx, tracks, detectionToTest, dets);
+                cost = statisticalDifferance(trackIdx, m_tracks, detectionToTest, m_dets);
                 if (cost < minVal)
                 {
                     minValIdx = detectionToTest;
@@ -83,9 +83,9 @@ void TrackFileMgr::binningAssociate(TrackFile &tracks, DetList &dets)
                 }
             }
 
-            tracks.trackFiles[trackIdx].corrDet = minValIdx;
-            dets.detList[tracks.trackFiles[trackIdx].corrDet].correlated = true;
-            dets.detList[tracks.trackFiles[trackIdx].corrDet].corrTrack = trackIdx;
+            m_tracks.trackFiles[trackIdx].corrDet = minValIdx;
+            m_dets.detList[m_tracks.trackFiles[trackIdx].corrDet].correlated = true;
+            m_dets.detList[m_tracks.trackFiles[trackIdx].corrDet].corrTrack = trackIdx;
 
             trackHits[trackIdx] = 0; // Clear trackHits
         }

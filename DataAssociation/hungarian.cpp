@@ -1,17 +1,15 @@
 #include "TrackFileMgr.hpp"
 
-void TrackFileMgr::hungarianAssociate(  DetList &dets,
-                                        TrackFile &tracks
-                                        )
+void TrackFileMgr::hungarianAssociate()
 {
     // DONT RUN IF THERE IS NOTHING TO DO
-    if ((tracks.numTracks == 0) || (dets.numDets == 0))
+    if ((m_tracks.numTracks == 0) || (m_dets.numDets == 0))
     {
         return;
     }
 
-    int DET_SIZE = dets.numDets;
-    int TRACK_SIZE = tracks.numTracks;
+    int DET_SIZE = m_dets.numDets;
+    int TRACK_SIZE = m_tracks.numTracks;
 
     int TERMINATE;
 
@@ -45,7 +43,7 @@ void TrackFileMgr::hungarianAssociate(  DetList &dets,
     {
         for (int det = 0; det < DET_SIZE; det++)
         {
-            double cost = euclidean(trk, tracks, det, dets);
+            double cost = euclidean(trk, m_tracks, det, m_dets);
             if (cost <= 25) 
             {
                 cost_matrix[trk][det] = cost;
@@ -219,13 +217,13 @@ void TrackFileMgr::hungarianAssociate(  DetList &dets,
     {
         if(state[det] != -1)
         {
-            dets.detList[det].correlated = true;
-            dets.detList[det].corrTrack = state[det];
+            m_dets.detList[det].correlated = true;
+            m_dets.detList[det].corrTrack = state[det];
         }
         else
         {
-            dets.detList[det].correlated = false;
-            dets.detList[det].corrTrack = state[det];
+            m_dets.detList[det].correlated = false;
+            m_dets.detList[det].corrTrack = state[det];
         }
     }
     // Label Tracks as correlated or not
@@ -235,11 +233,11 @@ void TrackFileMgr::hungarianAssociate(  DetList &dets,
         {
             if (OG_cost_matrix[state[det]][det] < 25)
             {
-                tracks.trackFiles[state[det]].corrDet = det;
+                m_tracks.trackFiles[state[det]].corrDet = det;
             }
             else
             {
-                tracks.trackFiles[state[det]].corrDet = -1;
+                m_tracks.trackFiles[state[det]].corrDet = -1;
             }
         }
     }

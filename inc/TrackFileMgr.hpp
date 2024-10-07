@@ -9,27 +9,23 @@ public:
     ~TrackFileMgr(); // Destructor
 
     uint16_t m_frame;
+    TrackFile m_tracks;
+    DetList m_dets;
 
-    void updateFrameVariables(TrackFile &tracks, DetList &dets);
-    void predictTrackLocationAndGate(TrackFile tracks, double dt);
-    void updateTrackEstPosition(TrackFile &tracks, DetList &dets);
-    void correctTrackState(TrackFile tracks, double dt);
-    void checkPersistency(TrackFile &tracks);
-    void frameCleanUp(TrackFile &tracks, DetList &dets);
-    void attemptOpenTracks(TrackFile &tracks, DetList &dets);
-    void updateTrackVariables(TrackFile &tracks, DetList &dets);
+    void updateFrameVariables();
+    void predictTrackLocationAndGate(double dt);
+    void updateTrackEstPosition();
+    void correctTrackState(double dt);
+    void checkPersistency();
+    void frameCleanUp();
+    void attemptOpenTracks();
+    void updateTrackVariables();
 
-    void binningAssociate(TrackFile &tracks, DetList &dets);
+    void binningAssociate();
     
-    void hungarianAssociate(
-                            DetList &dets,
-                            TrackFile &tracks
-                            );
+    void hungarianAssociate();
 
-    void auctionAssociate(
-                            DetList &dets,
-                            TrackFile &tracks
-                            );
+    void auctionAssociate();
 
 };
 

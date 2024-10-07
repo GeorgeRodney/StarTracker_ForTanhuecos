@@ -22,9 +22,9 @@ using namespace std;
 #define STATE_MAX 200
 #define DET_MAX   100
 #define ACCEL_STD 1
-#define STD_POS 3
-#define STD_VEL 5
-#define STD_MEAS 0.33
+#define STD_POS 0.5
+#define STD_VEL 1
+#define STD_MEAS 0.11
 
 enum ValidDet
 {

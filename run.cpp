@@ -36,11 +36,8 @@ int main()
     }
     numFrames++;
 
-    DetList dets;
-    TrackFile tracks;
-
     // Define a simple dt to start each frame is dt = 1.0
-    double dt = 1.0;
+    double dt = 0.1;
 
     for (int frame = 0; frame < numFrames; frame++)
     {
@@ -58,13 +55,13 @@ int main()
         {
             if (frameHold[idx] == frame)
             {
-                dets.detList[detIdx].pos[0] = xHold[idx];
-                dets.detList[detIdx].pos[1] = yHold[idx];
-                dets.detList[detIdx].valid  = VALID_DET;
+                tracker_.m_dets.detList[detIdx].pos[0] = xHold[idx];
+                tracker_.m_dets.detList[detIdx].pos[1] = yHold[idx];
+                tracker_.m_dets.detList[detIdx].valid  = VALID_DET;
                 detIdx++;
             }
         }
-        dets.numDets = detIdx;
+        tracker_.m_dets.numDets = detIdx;
         /*
         >----------------------------------------------------------------------------
         |
@@ -73,7 +70,7 @@ int main()
         |   1. Predict track location
         |   2. Associate Dets and Tracks
         |   3. Birth / Decay trackFiles
-        |   4. Estimate new locations for those tracks based on detection information 
+        |   4. Estimate new locations for those tracker_.m_tracks based on detection information 
         |
         >----------------------------------------------------------------------------
         */
@@ -85,7 +82,7 @@ int main()
         |
         >----------------------------------------------------------------------------
         */
-        tracker_.updateFrameVariables(tracks, dets);
+        tracker_.updateFrameVariables();
 
         /*
         >----------------------------------------------------------------------------
@@ -94,7 +91,7 @@ int main()
         |
         >----------------------------------------------------------------------------
         */
-        tracker_.predictTrackLocationAndGate(tracks, dt);
+        tracker_.predictTrackLocationAndGate(dt);
 
         /*
         >----------------------------------------------------------------------------
@@ -105,8 +102,8 @@ int main()
         >----------------------------------------------------------------------------
         */
         cout << endl;
-        // tracker_.binningAssociate(tracks, dets);
-        tracker_.hungarianAssociate(dets, tracks);
+        // tracker_.binningAssociate(tracker_.m_tracks, dets);
+        tracker_.hungarianAssociate();
         // print_state(state);
 
         /*>----------------------------------------------------------------------------
@@ -114,24 +111,24 @@ int main()
         |   3.  Update Track Position Estimate based on associated detection
         |
         >----------------------------------------------------------------------------*/
-        tracker_.updateTrackEstPosition(tracks, dets);
+        tracker_.updateTrackEstPosition();
 
         /*>----------------------------------------------------------------------------
         |
         |   4.  Birth and Decay Track Files
         |
         >----------------------------------------------------------------------------*/
-        tracker_.updateTrackVariables(tracks, dets);
+        tracker_.updateTrackVariables();
 
         // FRAME STATE
         std::cout << "Frame: " << tracker_.m_frame++ << std::endl;
-        for (int track = 0; track < TRACK_MAX; track++)
+        for (int track = 0; track < 20; track++)
         {
-            if (tracks.trackFiles[track].state != CLOSED)
-            {
-                std::cout << "Track: " << track << ". Correlated?: " << tracks.trackFiles[track].corrDet << ". Status: " << tracks.trackFiles[track].state 
-                    << ". Estimated Position: " << tracks.trackFiles[track].estPos[0] << ". " << tracks.trackFiles[track].estPos[1] << ". Estimated Vel " << tracks.trackFiles[track].estVel[0] << ". " << tracks.trackFiles[track].estVel[1] << std::endl;
-            }
+            // if (tracker_.m_tracks.trackFiles[track].state != CLOSED)
+            // {
+                std::cout << "Track: " << track << ". Correlated?: " << tracker_.m_tracks.trackFiles[track].corrDet << ". Status: " << tracker_.m_tracks.trackFiles[track].state 
+                    << ". Estimated Position: " << tracker_.m_tracks.trackFiles[track].estPos[0] << ". " << tracker_.m_tracks.trackFiles[track].estPos[1] << ". Estimated Vel " << tracker_.m_tracks.trackFiles[track].estVel[0] << ". " << tracker_.m_tracks.trackFiles[track].estVel[1] << std::endl;
+            // }
             
         }
 
@@ -140,7 +137,7 @@ int main()
         |   5.  Frame clean up 
         |
         >----------------------------------------------------------------------------*/
-        tracker_.frameCleanUp(tracks, dets);
+        tracker_.frameCleanUp();
     }
 
     return 0;

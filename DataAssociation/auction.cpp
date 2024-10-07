@@ -1,11 +1,9 @@
 #include "TrackFileMgr.hpp"
 
-void TrackFileMgr::auctionAssociate(DetList &dets,
-                                    TrackFile     &tracks
-                                    )
+void TrackFileMgr::auctionAssociate()
 {   
     // DONT RUN IF THERE IS NOTHING TO DO
-    if ((tracks.numTracks == 0) || (dets.numDets == 0))
+    if ((m_tracks.numTracks == 0) || (m_dets.numDets == 0))
     {
         return;
     }
@@ -22,8 +20,8 @@ void TrackFileMgr::auctionAssociate(DetList &dets,
     int iterations = 1;
     double epsilon = 0.2;
 
-    int DET_SIZE = dets.numDets;
-    int TRACK_SIZE = tracks.numTracks;
+    int DET_SIZE = m_dets.numDets;
+    int TRACK_SIZE = m_tracks.numTracks;
 
     vector<int>             state(STATE_MAX, -1);
     vector<vector<double>>  cost_matrix(TRACK_SIZE, vector<double>(DET_SIZE, -1.0));
@@ -36,7 +34,7 @@ void TrackFileMgr::auctionAssociate(DetList &dets,
     {
         for (int det = 0; det < DET_SIZE; det++)
         {
-            cost_matrix[track][det] = euclidean(track, tracks, det, dets);
+            cost_matrix[track][det] = euclidean(track, m_tracks, det, m_dets);
             // cout << cost_matrix[track][det] << endl;
         }
     }
@@ -122,7 +120,7 @@ void TrackFileMgr::auctionAssociate(DetList &dets,
 
     // print_state(state);
 
-    // print unassociated dets
+    // print unassociated m_dets
     // std::cout << "Unassociated detections: " << endl;
     // for (int det = 0; det < DET_SIZE; det++)
     // {
@@ -137,13 +135,13 @@ void TrackFileMgr::auctionAssociate(DetList &dets,
     {
         if(state[det] != -1)
         {
-            dets.detList[det].correlated = true;
-            dets.detList[det].corrTrack = state[det];
+            m_dets.detList[det].correlated = true;
+            m_dets.detList[det].corrTrack = state[det];
         }
         else
         {
-            dets.detList[det].correlated = false;
-            dets.detList[det].corrTrack = state[det];
+            m_dets.detList[det].correlated = false;
+            m_dets.detList[det].corrTrack = state[det];
         }
     }
 
@@ -152,7 +150,7 @@ void TrackFileMgr::auctionAssociate(DetList &dets,
     {
         if (state[det] != -1)
         {
-            tracks.trackFiles[state[det]].corrDet = det;
+            m_tracks.trackFiles[state[det]].corrDet = det;
         }
     }
 
