@@ -16,9 +16,9 @@ int main()
     }
 
     int frame;
-    vector<double> xHold(200, -1);
-    vector<double> yHold(200, -1);
-    vector<double> frameHold(200, -1);
+    vector<double> xHold(2000, -1);
+    vector<double> yHold(2000, -1);
+    vector<double> frameHold(2000, -1);
 
     int idx = 0;
     int numFrames = -1;

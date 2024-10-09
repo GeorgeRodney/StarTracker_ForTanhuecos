@@ -24,16 +24,21 @@ plt.figure(figsize=(8,8))
 # Loop through each frame to plot
 for frame in frames:
     frame_data = data[data['frame'] == frame]
-    print(frame_data)
+    # print(frame_data)
+    # Separate detections (ID = 0) and tracks (ID = 1)
+    detections = frame_data[frame_data['ID'] == 0]
+    tracks = frame_data[frame_data['ID'] == 1]
+    
+    # Debugging: Print detections and tracks to verify the separation
+    print(f"Frame {frame} - Detections:\n{detections}")
+    print(f"Frame {frame} - Tracks:\n{tracks}")
     
     # Plot detections
-    plt.scatter(frame_data['x'], frame_data['y'], c='blue', label='Detection', alpha=0.5)
-
-    # # Plot estimated positions
-    # plt.scatter(frame_data['est_x'], frame_data['est_y'], c='green', label='Estimated', marker='x', alpha=0.7)
+    plt.scatter(detections['x'], detections['y'], c='blue', label='Detection', alpha=0.5)
     
-    # # Plot predicted positions
-    # plt.scatter(frame_data['pred_x'], frame_data['pred_y'], c='red', label='Predicted', marker='o', alpha=0.7)
+    # Plot tracks
+    plt.scatter(tracks['x'], tracks['y'], c='green', label='Track', marker='+', s=100,  alpha=0.7)
+    
 
     # Add titles and labels
     plt.title(f'Tracking Frame {frame}')
