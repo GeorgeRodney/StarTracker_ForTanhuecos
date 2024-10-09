@@ -54,7 +54,7 @@ for frame in frames:
 
     # Show the frame
     plt.show(block=False)  # Use block=False to not block the code execution
-    plt.pause(0.1)  # Pause for 1 second
+    plt.pause(0.3)  # Pause for 1 second
 
     # Clear figure for the next frame
     plt.clf()  # Clear the current figure

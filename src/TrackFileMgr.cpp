@@ -202,7 +202,7 @@ void TrackFileMgr::attemptOpenTracks()
                 {
                     m_tracks.trackFiles[track].state = OPEN;
                     m_tracks.trackFiles[track].corrDet = det;
-                    m_tracks.trackFiles[track].persistance;
+                    m_tracks.trackFiles[track].persistance++;
 
                     m_tracks.trackFiles[track].estPos[0] = m_dets.detList[det].pos[0];
                     m_tracks.trackFiles[track].estPos[1] = m_dets.detList[det].pos[1];
@@ -254,9 +254,9 @@ void TrackFileMgr::frameCleanUp()
 
 void TrackFileMgr::updateTrackVariables()
 {   
-    TrackFileMgr::checkPersistency();
-
     TrackFileMgr::attemptOpenTracks();
+
+    TrackFileMgr::checkPersistency();
 }
 
 void TrackFileMgr::correctTrackState(double dt)
