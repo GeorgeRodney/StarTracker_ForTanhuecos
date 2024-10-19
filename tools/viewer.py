@@ -4,7 +4,6 @@ import os
 import re
 import FrameInfo as fi
 from collections import Counter
-import time
 
 DET = 0
 TRACK = 1
@@ -49,7 +48,10 @@ for line in range(len(lines)):
 
 
 # Visualize SCENE
-plt.figure(figsize= (10,10))
+fig = plt.figure(figsize= (10,10))
+# fig.patch.set_facecolor('black')
+ax = plt.gca()
+ax.set_facecolor('black')
 plt.xlim(0, 512)
 plt.ylim(0, 512)
 plt.gca().invert_yaxis()
@@ -60,16 +62,16 @@ for frame in range(len(scene)):
         
         if (scene[frame].detValid == True):
             for det in range(len(scene[frame].detections)):
-                plt.scatter(scene[frame].detections[det].X, scene[frame].detections[det].Y, s=10, c='red')
+                plt.scatter(scene[frame].detections[det].X, scene[frame].detections[det].Y, s=5, label='DETECTION', c='white')
 
         if (scene[frame].trackValid == True):
             for track in range(len(scene[frame].tracks)):
                 if (scene[frame].tracks[track].status == 1):
-                    plt.scatter(scene[frame].tracks[track].X, scene[frame].tracks[track].Y, edgecolor='blue', facecolor='none', s=100, label='Hollow Circle', marker='o')
+                    plt.scatter(scene[frame].tracks[track].X, scene[frame].tracks[track].Y, edgecolor='blue', facecolor='none', s=100, label='OPEN TRACK', marker='o')
                 elif (scene[frame].tracks[track].status == 2):
-                    plt.scatter(scene[frame].tracks[track].X, scene[frame].tracks[track].Y, edgecolor='green', facecolor='none', s=100, label='Hollow Circle', marker='o')
+                    plt.scatter(scene[frame].tracks[track].X, scene[frame].tracks[track].Y, edgecolor='green', facecolor='none', s=100, label='CONVERGED TRACK', marker='^')
 
-    plt.pause(1)
+    plt.pause(0.05)
     plt.cla()
     plt.xlim(0, 512)
     plt.ylim(0, 512)

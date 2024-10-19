@@ -21,7 +21,7 @@ using namespace std;
 #define TRACK_MAX 200
 #define STATE_MAX 200
 #define DET_MAX   100
-#define ACCEL_STD 5
+#define ACCEL_STD 3
 #define STD_POS 1.66
 #define STD_VEL 5
 #define STD_MEAS 0.33
@@ -82,6 +82,7 @@ public:
     TrackState state = CLOSED;
     uint8_t persistance = 0;
     double gate;
+    double procNoise;
     Track():    predVel(DEGREE,0.0),   
                 estVel(DEGREE, 0.0),
                 predPos(DEGREE,0.0),
@@ -89,6 +90,7 @@ public:
                 predCov(4, vector<double>(4, 0.0)),
                 estCov(4, vector<double>(4, 0.0)),
                 gate(25.0),
+                procNoise(ACCEL_STD),
                 K(4, vector<double>(2, 0.0)),
                 H(2, vector<double>(4, 0.0))
     {
@@ -118,6 +120,7 @@ public:
         {
             predCov[i] = {0.0, 0.0, 0.0, 0.0};
             estCov[i] = {0.0, 0.0, 0.0, 0.0};
+            K[i] = {0.0, 0.0};
         }
 
         corrDet = -1;

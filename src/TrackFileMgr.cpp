@@ -27,7 +27,7 @@ void TrackFileMgr::predictTrackLocationAndGate(double dt)
         F[2][2] = 1.0;
         F[3][3] = 1.0;
 
-        double process_noise = 0.1;
+        double process_noise = m_tracks.trackFiles[0].procNoise;
         vector<vector<double>> Q(4, vector<double>(4, 0.0));
         Q[0][0] = process_noise * dt*dt*dt*dt / 4;
         Q[0][2] = process_noise * dt*dt*dt / 2;
