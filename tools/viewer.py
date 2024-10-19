@@ -78,7 +78,7 @@ def update(frame):
                 if track.status == 1:
                     plt.scatter(track.X, track.Y, edgecolor='blue', facecolor='none', s=100, label='OPEN TRACK', marker='o')
                 elif track.status == 2:
-                    plt.scatter(track.X, track.Y, edgecolor='green', facecolor='none', s=300, label='CONVERGED TRACK', marker='^')
+                    plt.scatter(track.X, track.Y, edgecolor='green', facecolor='none', s=200, label='CONVERGED TRACK', marker='^')
     return ax,
 
 # Create the animation using FuncAnimation

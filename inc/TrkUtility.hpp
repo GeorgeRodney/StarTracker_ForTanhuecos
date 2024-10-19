@@ -23,7 +23,7 @@ using namespace std;
 #define DET_MAX   100
 #define ACCEL_STD 3
 #define STD_POS 1.66
-#define STD_VEL 5
+#define STD_VEL 25
 #define STD_MEAS 0.33
 
 enum ValidDet
@@ -89,7 +89,7 @@ public:
                 estPos(DEGREE,0.0),
                 predCov(4, vector<double>(4, 0.0)),
                 estCov(4, vector<double>(4, 0.0)),
-                gate(25.0),
+                gate(10.0),
                 procNoise(ACCEL_STD),
                 K(4, vector<double>(2, 0.0)),
                 H(2, vector<double>(4, 0.0))
@@ -126,7 +126,7 @@ public:
         corrDet = -1;
         state   = CLOSED;
         persistance = 0;
-        gate    = 25.0;
+        gate    = 10.0;
     }
     
     void cleanCorrelated()

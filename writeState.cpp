@@ -31,10 +31,15 @@ int main ()
     // Originial Target
     dets[TARGET].pos[0] = 10; dets[TARGET].pos[1] = 12;
     dets[TARGET+1].pos[0] = 144; dets[TARGET+1].pos[1] = 300;
-    dets[TARGET+2].pos[0] = 212; dets[TARGET+2].pos[1] = 10;
+    dets[TARGET+2].pos[0] = 255; dets[TARGET+2].pos[1] = 255;
 
-    vector<double> vel(2);
-    vel[0] = 0.5; vel[1] = 1;
+    vector<double> vel1(2);
+    vector<double> vel2(2);
+    vector<double> vel3(2);
+
+    vel1[0] = 0.5; vel1[1] = 1;
+    vel2[0] = 2;   vel2[1] = -0.2;
+    vel3[0] = -1;  vel3[1] = 2.2;
     double dt = 1;
 
     //Write detection file
@@ -46,16 +51,16 @@ int main ()
             dets[j].pos[0] = dis(gen); dets[j].pos[1] = dis(gen);    
         }
         // Update target position
-        // dets[TARGET] = update_pos(dets[TARGET], vel, dt);
+        // dets[TARGET] = update_pos(dets[TARGET], vel1, dt);
 
         for (int i = 0; i < DET_SIZE; i ++)
         {
             DETS << frame << "\t" << dets[i].pos[0] << "\t" << dets[i].pos[1] << endl;;
         }
 
-        dets[TARGET] = update_pos(dets[TARGET], vel, dt);
-        dets[TARGET+1] = update_pos(dets[TARGET+1], vel, dt);
-        dets[TARGET+2] = update_pos(dets[TARGET+2], vel, dt);
+        dets[TARGET]   = update_pos(dets[TARGET], vel1, dt);
+        dets[TARGET+1] = update_pos(dets[TARGET+1], vel2, dt);
+        dets[TARGET+2] = update_pos(dets[TARGET+2], vel3, dt);
     }
 
     DETS.close();

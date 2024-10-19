@@ -8,79 +8,85 @@ void TrackFileMgr::binningAssociate()
         return;
     }
 
-    vector<vector<int>> tracksToDets(m_tracks.numTracks, vector<int>(m_dets.numDets, -1));
-    vector<vector<int>> detsToTracks(m_dets.numDets, vector<int>(m_tracks.numTracks, -1));
+    vector<vector<int>> tracksToDets(TRACK_MAX, vector<int>(DET_MAX, -1));
+    vector<vector<int>> detsToTracks(DET_MAX, vector<int>(TRACK_MAX, -1));
     vector<int> trackHits(TRACK_MAX, 0);
     vector<int> detHits(DET_MAX, 0);
     int trkHitIdx = 0;
     int detHitIdx = 0;
     double cost;
-
-    double minVal = 100000.0;
+    double minVal;
     int minValIdx = -1;
 
     // Gate the m_tracks
-    for(int16_t trackIdx = 0; trackIdx < m_tracks.numTracks; trackIdx++)
+    for(int16_t trackIdx = 0; trackIdx < m_numActiveTracks; trackIdx++)
     {
+        int tf = m_activeList[trackIdx];
         for (int16_t detIdx = 0; detIdx < m_dets.numDets; detIdx++)
         {
-            if (m_tracks.trackFiles[trackIdx].state != CLOSED)
+            // CALCULATE GATE
+            double diff = euclidean(tf, m_tracks, detIdx, m_dets);
+            // double diff = statisticalDifferance(tf, m_tracks, detIdx, m_dets);
+            // std::cout << "FRAME: " << m_frame << std::setw(10)
+            //             << "cost: "  << diff << std::setw(10)
+            //                 << "det: " << detIdx << std::setw(10)
+            //                     << "track: " << trackIdx << std::setw(10)
+            //                         << std::endl;
+
+            if (diff < m_tracks.trackFiles[tf].gate)
             {
-                // CALCULATE GATE
-                double diff = statisticalDifferance(trackIdx, m_tracks, detIdx, m_dets);
-                if (diff < m_tracks.trackFiles[trackIdx].gate)
+                // Store track stuff
+                trackHits[tf]++;
+                for (int trkHitIdx = 0; trkHitIdx < m_dets.numDets; trkHitIdx++)
                 {
-                    // Store track stuff
-                    trackHits[trackIdx]++;
-                    for (int trkHitIdx = 0; trkHitIdx < DET_MAX; trkHitIdx++)
+                    if (tracksToDets[tf][trkHitIdx] == -1)
                     {
-                        if (tracksToDets[trackIdx][trkHitIdx] == -1)
-                        {
-                            tracksToDets[trackIdx][trkHitIdx] = detIdx;
-                            break;
-                        }
-                    }
-                    
-                    // Store Det Info
-                    detHits[detIdx]++;
-                    for (int detHitIdx = 0; detHitIdx < TRACK_MAX; detHitIdx++)
-                    {
-                        if (detsToTracks[detIdx][detHitIdx] == -1)
-                        {
-                            detsToTracks[detIdx][detHitIdx] = trackIdx;
-                            break;
-                        }
+                        tracksToDets[tf][trkHitIdx] = detIdx;
+                        break;
                     }
                 }
-
+                
+                // Store Det Info
+                detHits[detIdx]++;
+                for (int detHitIdx = 0; detHitIdx < TRACK_MAX; detHitIdx++)
+                {
+                    if (detsToTracks[detIdx][detHitIdx] == -1)
+                    {
+                        detsToTracks[detIdx][detHitIdx] = tf;
+                        break;
+                    }
+                }
             }
         }
     }
 
     // ASSOCIATE
-    for(int16_t trackIdx = 0; trackIdx < TRACK_MAX; trackIdx++)
+    for(int16_t trackIdx = 0; trackIdx < m_numActiveTracks; trackIdx++)
     {   
+        int tf = m_activeList[trackIdx];
+        minVal = 100000.0;
         // Associate the m_tracks with one detection in their gate
-        if(trackHits[trackIdx] == 1)
+        if(trackHits[tf] == 1)
         {
-            m_tracks.trackFiles[trackIdx].corrDet = tracksToDets[trackIdx][0];
-            m_dets.detList[m_tracks.trackFiles[trackIdx].corrDet].correlated = true;
-            m_dets.detList[m_tracks.trackFiles[trackIdx].corrDet].corrTrack = trackIdx;
+            m_tracks.trackFiles[tf].corrDet = tracksToDets[tf][0];
+            m_dets.detList[m_tracks.trackFiles[tf].corrDet].correlated = true;
+            m_dets.detList[m_tracks.trackFiles[tf].corrDet].corrTrack = tf;
 
             // Remove from lists
-            trackHits[trackIdx] = 0;
-            tracksToDets[trackIdx][0] = -1;
+            trackHits[tf] = 0;
+            tracksToDets[tf][0] = -1;
 
         }
 
         // Associate track with detection with the smallest cost
-        if (trackHits[trackIdx] > 1)
+        if (trackHits[tf] > 1)
         {
-            for(int idx = 0; idx < trackHits[trackIdx]; idx++)
+            for(int idx = 0; idx < trackHits[tf]; idx++)
             {
-                int detectionToTest = tracksToDets[trackIdx][idx];
-                tracksToDets[trackIdx][idx] = -1; // Clear the detection out
-                cost = statisticalDifferance(trackIdx, m_tracks, detectionToTest, m_dets);
+                int detectionToTest = tracksToDets[tf][idx];
+                tracksToDets[tf][idx] = -1; // Clear the detection out
+                cost = euclidean(tf, m_tracks, detectionToTest, m_dets);
+                // cost = statisticalDifferance(tf, m_tracks, detectionToTest, m_dets);
                 if (cost < minVal)
                 {
                     minValIdx = detectionToTest;
@@ -88,11 +94,11 @@ void TrackFileMgr::binningAssociate()
                 }
             }
 
-            m_tracks.trackFiles[trackIdx].corrDet = minValIdx;
-            m_dets.detList[m_tracks.trackFiles[trackIdx].corrDet].correlated = true;
-            m_dets.detList[m_tracks.trackFiles[trackIdx].corrDet].corrTrack = trackIdx;
+            m_tracks.trackFiles[tf].corrDet = minValIdx;
+            m_dets.detList[m_tracks.trackFiles[tf].corrDet].correlated = true;
+            m_dets.detList[m_tracks.trackFiles[tf].corrDet].corrTrack = tf;
 
-            trackHits[trackIdx] = 0; // Clear trackHits
+            trackHits[tf] = 0; // Clear trackHits
         }
     }
 }
