@@ -4,6 +4,8 @@ import os
 import re
 import FrameInfo as fi
 from collections import Counter
+import numpy as np
+import matplotlib.animation as animation
 
 DET = 0
 TRACK = 1
@@ -48,33 +50,41 @@ for line in range(len(lines)):
 
 
 # Visualize SCENE
-fig = plt.figure(figsize= (10,10))
-# fig.patch.set_facecolor('black')
+# Create a figure and axis for the animation
+fig = plt.figure(figsize=(10, 10))
 ax = plt.gca()
 ax.set_facecolor('black')
 plt.xlim(0, 512)
 plt.ylim(0, 512)
 plt.gca().invert_yaxis()
 
-for frame in range(len(scene)):
-
-    if (scene[frame].frameValid == True):
-        
-        if (scene[frame].detValid == True):
-            for det in range(len(scene[frame].detections)):
-                plt.scatter(scene[frame].detections[det].X, scene[frame].detections[det].Y, s=5, label='DETECTION', c='white')
-
-        if (scene[frame].trackValid == True):
-            for track in range(len(scene[frame].tracks)):
-                if (scene[frame].tracks[track].status == 1):
-                    plt.scatter(scene[frame].tracks[track].X, scene[frame].tracks[track].Y, edgecolor='blue', facecolor='none', s=100, label='OPEN TRACK', marker='o')
-                elif (scene[frame].tracks[track].status == 2):
-                    plt.scatter(scene[frame].tracks[track].X, scene[frame].tracks[track].Y, edgecolor='green', facecolor='none', s=100, label='CONVERGED TRACK', marker='^')
-
-    plt.pause(0.05)
-    plt.cla()
+# Update function to plot detections and tracks for each frame
+def update(frame):
+    ax.cla()  # Clear the axis for the next frame
+    ax.set_facecolor('black')
     plt.xlim(0, 512)
     plt.ylim(0, 512)
     plt.gca().invert_yaxis()
 
-print("Done")
+    if scene[frame].frameValid:
+        # Plot detections if valid
+        if scene[frame].detValid:
+            for det in scene[frame].detections:
+                plt.scatter(det.X, det.Y, s=5, label='DETECTION', c='white')
+        
+        # Plot tracks if valid
+        if scene[frame].trackValid:
+            for track in scene[frame].tracks:
+                if track.status == 1:
+                    plt.scatter(track.X, track.Y, edgecolor='blue', facecolor='none', s=100, label='OPEN TRACK', marker='o')
+                elif track.status == 2:
+                    plt.scatter(track.X, track.Y, edgecolor='green', facecolor='none', s=300, label='CONVERGED TRACK', marker='^')
+    return ax,
+
+# Create the animation using FuncAnimation
+ani = animation.FuncAnimation(fig, update, frames=len(scene), interval=50, blit=False)
+
+# Optionally, save the animation as a .avi file
+ani.save('../output/starsClutter.avi', writer='ffmpeg', fps=30)
+
+plt.show()

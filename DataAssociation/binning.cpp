@@ -8,7 +8,6 @@ void TrackFileMgr::binningAssociate()
         return;
     }
 
-    vector<int> state(STATE_MAX, -1); // Index is Det. Value is Track
     vector<vector<int>> tracksToDets(m_tracks.numTracks, vector<int>(m_dets.numDets, -1));
     vector<vector<int>> detsToTracks(m_dets.numDets, vector<int>(m_tracks.numTracks, -1));
     vector<int> trackHits(TRACK_MAX, 0);
