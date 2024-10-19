@@ -37,7 +37,7 @@ int main()
     numFrames++;
 
     // Define a simple dt to start each frame is dt = 1.0
-    double dt = 0.1;
+    double dt = 1;
 
     for (int frame = 0; frame < numFrames; frame++)
     {
@@ -101,8 +101,8 @@ int main()
         |
         >----------------------------------------------------------------------------
         */
-        // tracker_.binningAssociate();
-        tracker_.hungarianAssociate();
+        tracker_.binningAssociate();
+        // tracker_.hungarianAssociate();
 
         /*>----------------------------------------------------------------------------
         |
@@ -111,23 +111,24 @@ int main()
         >----------------------------------------------------------------------------*/
         tracker_.updateTrackEstPosition();
 
-        // FRAME STATE
-        for (int det = 0; det < tracker_.m_dets.numDets; det++)
-        {
-            std::cout << tracker_.m_frame << "," << 0 << "," << tracker_.m_dets.detList[det].pos[0] << "," << tracker_.m_dets.detList[det].pos[1] << std::endl;
-        }
-
-        for (int track = 0; track < tracker_.m_tracks.numTracks; track++)
-        {
-            std::cout << tracker_.m_frame << "," << 1 << "," << tracker_.m_tracks.trackFiles[track].estPos[0] << "," << tracker_.m_tracks.trackFiles[track].estPos[1] << std::endl;
-        }
-
         /*>----------------------------------------------------------------------------
         |
         |   4.  Birth and Decay Track Files
         |
         >----------------------------------------------------------------------------*/
         tracker_.updateTrackVariables();
+
+        // FRAME STATE
+        for (int det = 0; det < tracker_.m_dets.numDets; det++)
+        {
+            std::cout << tracker_.m_frame << "," << 0 << "," << tracker_.m_dets.detList[det].pos[0] << "," << tracker_.m_dets.detList[det].pos[1] << "," << -1 << std::endl;
+        }
+
+        for (int track = 0; track < tracker_.m_numActiveTracks; track++)
+        {
+            int trackFile = tracker_.m_activeList[track];
+            std::cout << tracker_.m_frame << "," << 1 << "," << tracker_.m_tracks.trackFiles[trackFile].predPos[0] << "," << tracker_.m_tracks.trackFiles[trackFile].predPos[1] << "," << tracker_.m_tracks.trackFiles[trackFile].state << std::endl;
+        }
 
         tracker_.m_frame++;
 

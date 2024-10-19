@@ -20,7 +20,7 @@ int main ()
     uniform_int_distribution<>  dis(0, FPA-1);
 
     // Calculate the false alarm rate3
-    int REAL_DETS       = 1;
+    int REAL_DETS       = 3;
     int FALSE_DETS      = 10;
     double false_rate   = FALSE_DETS / (FPA * FPA);
     int DET_SIZE        = REAL_DETS + FALSE_DETS;
@@ -30,6 +30,9 @@ int main ()
 
     // Originial Target
     dets[TARGET].pos[0] = 10; dets[TARGET].pos[1] = 12;
+    dets[TARGET+1].pos[0] = 144; dets[TARGET+1].pos[1] = 300;
+    dets[TARGET+2].pos[0] = 212; dets[TARGET+2].pos[1] = 10;
+
     vector<double> vel(2);
     vel[0] = 0.5; vel[1] = 1;
     double dt = 1;
@@ -51,6 +54,8 @@ int main ()
         }
 
         dets[TARGET] = update_pos(dets[TARGET], vel, dt);
+        dets[TARGET+1] = update_pos(dets[TARGET+1], vel, dt);
+        dets[TARGET+2] = update_pos(dets[TARGET+2], vel, dt);
     }
 
     DETS.close();

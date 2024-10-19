@@ -6,7 +6,9 @@ using namespace Eigen;
 TrackFileMgr::TrackFileMgr()
 :   m_frame(0),
     m_tracks(),
-    m_dets()
+    m_dets(),
+    m_numActiveTracks(0),
+    m_activeList(TRACK_MAX, -1)
 {
 }
 
@@ -202,7 +204,7 @@ void TrackFileMgr::attemptOpenTracks()
                 {
                     m_tracks.trackFiles[track].state = OPEN;
                     m_tracks.trackFiles[track].corrDet = det;
-                    m_tracks.trackFiles[track].persistance++;
+                    // m_tracks.trackFiles[track].persistance++;
 
                     m_tracks.trackFiles[track].estPos[0] = m_dets.detList[det].pos[0];
                     m_tracks.trackFiles[track].estPos[1] = m_dets.detList[det].pos[1];
@@ -226,6 +228,26 @@ void TrackFileMgr::attemptOpenTracks()
             }
 
             m_dets.numUncorrDets++;
+        }
+    }
+}
+
+void TrackFileMgr::modifyActiveList()
+{   
+    m_activeList.assign(m_activeList.size(), -1);
+    m_numActiveTracks = 0;
+
+    for (int track = 0; track < TRACK_MAX; track++)
+    {
+        if(m_tracks.trackFiles[track].state == OPEN)
+        {
+            m_activeList[m_numActiveTracks] = track;
+            m_numActiveTracks++;
+        }
+        if (m_tracks.trackFiles[track].state == CONVERGED)
+        {
+            m_activeList[m_numActiveTracks] = track;
+            m_numActiveTracks++;
         }
     }
 }
@@ -257,6 +279,8 @@ void TrackFileMgr::updateTrackVariables()
     TrackFileMgr::attemptOpenTracks();
 
     TrackFileMgr::checkPersistency();
+
+    TrackFileMgr::modifyActiveList();
 }
 
 void TrackFileMgr::correctTrackState(double dt)

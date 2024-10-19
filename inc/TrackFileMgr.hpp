@@ -11,6 +11,8 @@ public:
     uint16_t m_frame;
     TrackFile m_tracks;
     DetList m_dets;
+    uint16_t m_numActiveTracks;
+    vector<int> m_activeList;
 
     void updateFrameVariables();
     void predictTrackLocationAndGate(double dt);
@@ -20,6 +22,7 @@ public:
     void frameCleanUp();
     void attemptOpenTracks();
     void updateTrackVariables();
+    void modifyActiveList();
 
     void binningAssociate();
     

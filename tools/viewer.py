@@ -1,62 +1,78 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import re
+import FrameInfo as fi
+from collections import Counter
+import time
+
+DET = 0
+TRACK = 1
 
 # Now use an absolute path to the file
-csv_path = '~/Desktop/projects/AssociatorTest/output/test.csv'  # Replace with the actual absolute path
+csv_path = '~/Desktop/projects/AssociatorTest/output/test.csv'
+csv_path = os.path.expanduser(csv_path)
+first_value_counter = Counter(line.split(',')[0] for line in open(csv_path) if line.strip())
+
+# frames = [frameStruct() for _ in range(len(first_value_counter))]
+scene = [fi.FrameInfo() for _ in range(len(first_value_counter))]
 
 if os.path.exists(csv_path):
     print("File found!")
 else:
     print("File not found.")
 
-# Load your data
-col_names = ['frame', 'ID', 'x', 'y']
-data = pd.read_csv(csv_path, names=col_names)  # Replace with your actual file
+# How many lines of the csv files
+with open(csv_path, 'r') as file:
+    lines = file.readlines()
 
-print(data.columns)
+pattern = r'(-?\d+(?:\.\d+)?)'
 
-# Assuming your CSV has columns like: frame, det_x, det_y, est_x, est_y, pred_x, pred_y
-frames = data['frame'].unique()
+# Load line data into structures
+for line in range(len(lines)):
 
-plt.figure(figsize=(8,8))
+    # temp DET   LINE: frame, ID, X, Y
+    # temp TRACK LINE: frame, ID, X, Y, Status
+    temp = re.findall(pattern, lines[line])
+    temp = [float(num) for num in temp]
+    scene[int(temp[0])].set_frame_valid(True)
 
-# Loop through each frame to plot
-for frame in frames:
-    frame_data = data[data['frame'] == frame]
-    # print(frame_data)
-    # Separate detections (ID = 0) and tracks (ID = 1)
-    detections = frame_data[frame_data['ID'] == 0]
-    tracks = frame_data[frame_data['ID'] == 1]
-    
-    # Debugging: Print detections and tracks to verify the separation
-    print(f"Frame {frame} - Detections:\n{detections}")
-    print(f"Frame {frame} - Tracks:\n{tracks}")
-    
-    # Plot detections
-    plt.scatter(detections['x'], detections['y'], c='blue', label='Detection', alpha=0.5)
-    
-    # Plot tracks
-    plt.scatter(tracks['x'], tracks['y'], c='green', label='Track', marker='+', s=100,  alpha=0.7)
-    
+    if (int(temp[1]) == DET):
+        temp_det = fi.Detection(temp[2], temp[3])
+        scene[int(temp[0])].append_detection(temp_det)
+        scene[int(temp[0])].set_det_valid(True)
 
-    # Add titles and labels
-    plt.title(f'Tracking Frame {frame}')
-    plt.xlabel('X Position')
-    plt.ylabel('Y Position')
-    
-    # Set x and y limits
-    plt.xlim([0, 511])
-    plt.ylim([0, 511])
+    if (int(temp[1]) == TRACK):
+        temp_track = fi.Track(temp[4], temp[2], temp[3])
+        scene[int(temp[0])].append_track(temp_track)
+        scene[int(temp[0])].set_track_valid(True)
 
-    # Add legend
-    # plt.legend()
 
-    # Show the frame
-    plt.show(block=False)  # Use block=False to not block the code execution
-    plt.pause(0.3)  # Pause for 1 second
+# Visualize SCENE
+plt.figure(figsize= (10,10))
+plt.xlim(0, 512)
+plt.ylim(0, 512)
+plt.gca().invert_yaxis()
 
-    # Clear figure for the next frame
-    plt.clf()  # Clear the current figure
+for frame in range(len(scene)):
+
+    if (scene[frame].frameValid == True):
+        
+        if (scene[frame].detValid == True):
+            for det in range(len(scene[frame].detections)):
+                plt.scatter(scene[frame].detections[det].X, scene[frame].detections[det].Y, s=10, c='red')
+
+        if (scene[frame].trackValid == True):
+            for track in range(len(scene[frame].tracks)):
+                if (scene[frame].tracks[track].status == 1):
+                    plt.scatter(scene[frame].tracks[track].X, scene[frame].tracks[track].Y, edgecolor='blue', facecolor='none', s=100, label='Hollow Circle', marker='o')
+                elif (scene[frame].tracks[track].status == 2):
+                    plt.scatter(scene[frame].tracks[track].X, scene[frame].tracks[track].Y, edgecolor='green', facecolor='none', s=100, label='Hollow Circle', marker='o')
+
+    plt.pause(1)
+    plt.cla()
+    plt.xlim(0, 512)
+    plt.ylim(0, 512)
+    plt.gca().invert_yaxis()
 
 print("Done")
