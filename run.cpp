@@ -7,7 +7,8 @@ int main()
 {
     TrackFileMgr tracker_;
 
-    ifstream detections("detections.csv");
+    // ifstream detections("detections.csv");
+    ifstream detections("detections_from_video.csv");
 
     if (!detections.is_open())
     {

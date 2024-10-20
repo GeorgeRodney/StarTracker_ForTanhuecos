@@ -89,6 +89,8 @@ def update(frame):
 ani = animation.FuncAnimation(fig, update, frames=len(scene), interval=50, blit=False)
 
 # Optionally, save the animation as a .avi file
-ani.save('../output/starsClutter.avi', writer='ffmpeg', fps=30)
+vid_output_path = '~/Desktop/projects/AssociatorTest/output/StarTracker.avi'
+vid_output_path = os.path.expanduser(vid_output_path)
+ani.save(vid_output_path, writer='ffmpeg', fps=30)
 
 plt.show()
