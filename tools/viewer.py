@@ -58,6 +58,10 @@ plt.xlim(0, 512)
 plt.ylim(0, 512)
 plt.gca().invert_yaxis()
 
+# Remove the white border and grid
+plt.axis('off')
+plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+
 # Update function to plot detections and tracks for each frame
 def update(frame):
     ax.cla()  # Clear the axis for the next frame
@@ -76,9 +80,9 @@ def update(frame):
         if scene[frame].trackValid:
             for track in scene[frame].tracks:
                 if track.status == 1:
-                    plt.scatter(track.X, track.Y, edgecolor='blue', facecolor='none', s=100, label='OPEN TRACK', marker='o')
+                    plt.scatter(track.X, track.Y, edgecolor='blue', facecolor='none', s=100, label='OPEN TRACK', marker='o', linewidths=2)
                 elif track.status == 2:
-                    plt.scatter(track.X, track.Y, edgecolor='green', facecolor='none', s=200, label='CONVERGED TRACK', marker='^')
+                    plt.scatter(track.X, track.Y, edgecolor='green', facecolor='none', s=200, label='CONVERGED TRACK', marker='^', linewidths=2)
     return ax,
 
 # Create the animation using FuncAnimation

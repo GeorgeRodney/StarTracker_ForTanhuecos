@@ -25,6 +25,7 @@ public:
     void modifyActiveList();
 
     void binningAssociate();
+    void removeDetFromLists(vector<vector<int>> &tracksToDets, vector<int> &trackHits, int temp_det);
     
     void hungarianAssociate();
 

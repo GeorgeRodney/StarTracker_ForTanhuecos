@@ -68,13 +68,18 @@ void TrackFileMgr::binningAssociate()
         // Associate the m_tracks with one detection in their gate
         if(trackHits[tf] == 1)
         {
-            m_tracks.trackFiles[tf].corrDet = tracksToDets[tf][0];
+            int temp_det = tracksToDets[tf][0];
+            m_tracks.trackFiles[tf].corrDet = temp_det;
             m_dets.detList[m_tracks.trackFiles[tf].corrDet].correlated = true;
             m_dets.detList[m_tracks.trackFiles[tf].corrDet].corrTrack = tf;
 
             // Remove from lists
             trackHits[tf] = 0;
             tracksToDets[tf][0] = -1;
+            
+            // Remove this detection from all the track lists
+            removeDetFromLists(tracksToDets, trackHits, temp_det);
+
 
         }
 
@@ -99,6 +104,22 @@ void TrackFileMgr::binningAssociate()
             m_dets.detList[m_tracks.trackFiles[tf].corrDet].corrTrack = tf;
 
             trackHits[tf] = 0; // Clear trackHits
+        }
+    }
+}
+
+void TrackFileMgr::removeDetFromLists(vector<vector<int>> &tracksToDets, vector<int> &trackHits, int temp_det)
+{
+    for (int trk = 0; trk < m_numActiveTracks; trk++)
+    {
+        int tf_ = m_activeList[trk];
+        for (int det = 0; det < m_dets.numDets; det++)
+        {
+            if (tracksToDets[tf_][det] == temp_det)
+            {
+                tracksToDets[tf_][det] = -1;
+                trackHits[tf_]--;
+            }
         }
     }
 }
