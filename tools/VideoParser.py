@@ -40,10 +40,12 @@ while True:
         break
 
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    cropped_frame = gray_frame[512:1024, 512:1024]
+    # cropped_frame = gray_frame[512:1024, 512:1024]
+
+    print(gray_frame.shape)
 
     # Detect blobs
-    keypoints = detector.detect(cropped_frame)
+    keypoints = detector.detect(gray_frame)
     
     print(frameNum)
     for det in keypoints:
@@ -53,7 +55,7 @@ while True:
     print('\n')
 
     # Draw detected blobs as red circles
-    output_image = cv2.drawKeypoints(cropped_frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    output_image = cv2.drawKeypoints(gray_frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
     # Show the image with the blobs
     cv2.imshow("Blob Detection", output_image)

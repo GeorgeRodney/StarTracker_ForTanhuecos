@@ -51,23 +51,23 @@ for line in range(len(lines)):
 
 # Visualize SCENE
 # Create a figure and axis for the animation
-fig = plt.figure(figsize=(10, 10))
+fig = plt.figure(figsize=(20, 10))
 ax = plt.gca()
 ax.set_facecolor('black')
-plt.xlim(0, 512)
-plt.ylim(0, 512)
+plt.xlim(0, 1920)
+plt.ylim(0, 1080)
 plt.gca().invert_yaxis()
 
 # Remove the white border and grid
-plt.axis('off')
-plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+# plt.axis('off')
+# plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
 # Update function to plot detections and tracks for each frame
 def update(frame):
     ax.cla()  # Clear the axis for the next frame
     ax.set_facecolor('black')
-    plt.xlim(0, 512)
-    plt.ylim(0, 512)
+    plt.xlim(0, 1920)
+    plt.ylim(0, 1080)
     plt.gca().invert_yaxis()
 
     if scene[frame].frameValid:
