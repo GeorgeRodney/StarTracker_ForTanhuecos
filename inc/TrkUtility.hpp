@@ -25,6 +25,7 @@ using namespace std;
 #define STD_POS 5
 #define STD_VEL 10
 #define STD_MEAS 0.33
+#define NO_CORRELATION -1
 
 enum ValidDet
 {
@@ -45,16 +46,12 @@ public:
     bool correlated;
     int corrTrack;
     int valid;
-    vector<vector<double>> measCov;
 
     Detection():    pos(DEGREE, 0.0), 
                     correlated(false), 
                     corrTrack(-1),
-                    valid(INVALID_DET),
-                    measCov(2, vector<double>(2, 0.0))
+                    valid(INVALID_DET)
     {
-        measCov[0][0] = STD_MEAS*STD_MEAS;
-        measCov[1][1] = STD_MEAS*STD_MEAS;
     };
 
     void clearDet()
@@ -70,66 +67,55 @@ public:
 class Track
 {
 public:
-    vector<double> predVel;
-    vector<double> estVel;
-    vector<double> predPos;
-    vector<double> estPos;
-    vector<vector<double>> predCov;
-    vector<vector<double>> estCov;
-    vector<vector<double>> K;
-    vector<vector<double>> H;
+    MatrixXd predState;
+    MatrixXd estState;
+    MatrixXd predCov;
+    MatrixXd estCov;
+    MatrixXd K;
     int corrDet = -1;
     TrackState state = CLOSED;
     uint8_t persistance = 0;
     double gate;
     double procNoise;
-    Track():    predVel(DEGREE,0.0),   
-                estVel(DEGREE, 0.0),
-                predPos(DEGREE,0.0),
-                estPos(DEGREE,0.0),
-                predCov(4, vector<double>(4, 0.0)),
-                estCov(4, vector<double>(4, 0.0)),
+    Track():    predState(MatrixXd::Zero(4,1)),
+                estState(MatrixXd::Zero(4,1)),
+                predCov(MatrixXd::Zero(4,4)),
+                estCov(MatrixXd::Zero(4,4)),
                 gate(10.0),
                 procNoise(ACCEL_STD),
-                K(4, vector<double>(2, 0.0)),
-                H(2, vector<double>(4, 0.0))
+                K(MatrixXd::Zero(4,2))
     {
-        predCov[0][0] = STD_POS*STD_POS;
-        predCov[1][1] = STD_POS*STD_POS;
-        predCov[2][2] = STD_VEL*STD_VEL;
-        predCov[3][3] = STD_VEL*STD_VEL;
+        predCov(0,0) = STD_POS*STD_POS;
+        predCov(1,1) = STD_POS*STD_POS;
+        predCov(2,2) = STD_VEL*STD_VEL;
+        predCov(3,3) = STD_VEL*STD_VEL;
 
-        estCov[0][0] = STD_POS*STD_POS;
-        estCov[1][1] = STD_POS*STD_POS;
-        estCov[2][2] = STD_VEL*STD_VEL;
-        estCov[3][3] = STD_VEL*STD_VEL;
-
-        H[0][0] = 1.0;
-        H[1][0] = 1.0;
+        estCov(0,0) = STD_POS*STD_POS;
+        estCov(1,1) = STD_POS*STD_POS;
+        estCov(2,2) = STD_VEL*STD_VEL;
+        estCov(3,3) = STD_VEL*STD_VEL;
     };
 
     // Reset function
     void reset()
     {
-        predVel = {0.0, 0.0};
-        estVel  = {0.0 ,0.0};
-        predPos = {0.0, 0.0};
-        estPos  = {0.0, 0.0};
+        predState = MatrixXd::Zero(4,1);
+        estState  = MatrixXd::Zero(4,1);
 
-        for (int8_t i = 0; i < 4; i++)
-        {
-            K[i] = {0.0, 0.0};
-        }
+        K = MatrixXd::Zero(4,2);
 
-        predCov[0][0] = STD_POS*STD_POS;
-        predCov[1][1] = STD_POS*STD_POS;
-        predCov[2][2] = STD_VEL*STD_VEL;
-        predCov[3][3] = STD_VEL*STD_VEL;
+        predCov = MatrixXd::Zero(4,4);
+        predCov(0,0) = STD_POS*STD_POS;
+        predCov(1,1) = STD_POS*STD_POS;
+        predCov(2,2) = STD_VEL*STD_VEL;
+        predCov(3,3) = STD_VEL*STD_VEL;
 
-        estCov[0][0] = STD_POS*STD_POS;
-        estCov[1][1] = STD_POS*STD_POS;
-        estCov[2][2] = STD_VEL*STD_VEL;
-        estCov[3][3] = STD_VEL*STD_VEL;
+        estCov = MatrixXd::Zero(4,4);
+        estCov(0,0) = STD_POS*STD_POS;
+        estCov(1,1) = STD_POS*STD_POS;
+        estCov(2,2) = STD_VEL*STD_VEL;
+        estCov(3,3) = STD_VEL*STD_VEL;
+
         corrDet = -1;
         state   = CLOSED;
         persistance = 0;
@@ -150,10 +136,15 @@ class DetList
     vector<Detection> detList;
     int numDets = 0;
     int numUncorrDets;
+    MatrixXd measCov;
 
     DetList():  detList(DET_MAX),
-                numUncorrDets(0)
-    {};
+                numUncorrDets(0),
+                measCov(MatrixXd::Zero(2,2))
+    {
+        measCov(0,0) = STD_MEAS*STD_MEAS;
+        measCov(1,1) = STD_MEAS*STD_MEAS;
+    };
 
 };
 
@@ -162,24 +153,31 @@ class TrackFile
     public:
     vector<Track> trackFiles;
     int numTracks = 0;
-    TrackFile(): trackFiles(TRACK_MAX){};
+    MatrixXd H;
+
+    TrackFile(): trackFiles(TRACK_MAX),
+                 H(MatrixXd::Zero(2,4))
+    {
+        H(0,0) = 1.0;
+        H(1,1) = 1.0;
+    };
 
 };
 
 inline double euclidean(int trk, TrackFile track, int det, DetList detection)
 {
-    return sqrt( pow(track.trackFiles[trk].estPos[1] - detection.detList[det].pos[1], 2) + 
-                    pow(track.trackFiles[trk].estPos[0] - detection.detList[det].pos[0], 2));
+    return sqrt( pow(track.trackFiles[trk].predState(1) - detection.detList[det].pos[1], 2) + 
+                    pow(track.trackFiles[trk].predState(0) - detection.detList[det].pos[0], 2));
 }
 
 inline double statisticalDifferance(int trk, TrackFile track, int det, DetList detection)
 {
     vector<vector<double>> S_inv(2, vector<double>(2, 0.0));
-    S_inv[0][0] = 1 / (track.trackFiles[trk].predCov[0][0] + detection.detList[det].measCov[0][0]);
-    S_inv[1][1] = 1 / (track.trackFiles[trk].predCov[1][1] + detection.detList[det].measCov[1][1]);
+    S_inv[0][0] = 1 / (track.trackFiles[trk].predCov(0,0) + detection.measCov(0,0));
+    S_inv[1][1] = 1 / (track.trackFiles[trk].predCov(1,1) + detection.measCov(1,1));
 
-    double deltaX = track.trackFiles[trk].predPos[0] - detection.detList[det].pos[0];
-    double deltaY = track.trackFiles[trk].predPos[1] - detection.detList[det].pos[1];
+    double deltaX = track.trackFiles[trk].predState(0) - detection.detList[det].pos[0];
+    double deltaY = track.trackFiles[trk].predState(1) - detection.detList[det].pos[1];
     
     double output = deltaX* deltaX * S_inv[0][0] + deltaY * deltaY * S_inv[1][1];
     return output;

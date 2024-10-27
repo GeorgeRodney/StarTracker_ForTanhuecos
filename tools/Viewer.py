@@ -50,7 +50,7 @@ for line in range(len(lines)):
         scene[int(temp[0])].set_det_valid(True)
 
     if (int(temp[1]) == TRACK):
-        temp_track = fi.Track(temp[4], temp[2], temp[3], temp[5], temp[6], temp[7], temp[8])
+        temp_track = fi.Track(temp[4], temp[2], temp[3], temp[5], temp[6])
         scene[int(temp[0])].append_track(temp_track)
         scene[int(temp[0])].set_track_valid(True)
 

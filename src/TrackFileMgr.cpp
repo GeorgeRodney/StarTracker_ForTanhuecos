@@ -19,77 +19,34 @@ TrackFileMgr::~TrackFileMgr()
 void TrackFileMgr::predictTrackLocationAndGate(double dt)
 {
     // STATE TRANSITION MATRIX F
-        vector<vector<double>> F(4, vector<double>(4, 0.0));
-        F[0][0] = 1.0;
-        F[2][0] = dt;
-        F[1][1] = 1.0;
-        F[3][1] = dt;
-        F[2][2] = 1.0;
-        F[3][3] = 1.0;
+        MatrixXd F = MatrixXd::Zero(4,4);
+        F <<    1, 0, dt, 0,
+                0, 1, 0, dt,
+                0, 0, 1, 0, 
+                0, 0, 0, 1;
 
         double process_noise = m_tracks.trackFiles[0].procNoise;
-        vector<vector<double>> Q(4, vector<double>(4, 0.0));
-        Q[0][0] = process_noise * dt*dt*dt*dt / 4;
-        Q[0][2] = process_noise * dt*dt*dt / 2;
-        Q[1][1] = process_noise * dt*dt*dt*dt / 4;
-        Q[1][3] = process_noise * dt*dt*dt / 2;
-        Q[2][0] = process_noise * dt*dt*dt / 2;
-        Q[2][2] = process_noise * dt*dt;
-        Q[3][1] = process_noise * dt*dt*dt / 2;
-        Q[3][3] = process_noise * dt*dt;
+        MatrixXd Q = MatrixXd::Zero(4,4);
+
+        Q(0,0) = process_noise * dt*dt*dt*dt / 4;
+        Q(0,2) = process_noise * dt*dt*dt / 2;
+        Q(1,1) = process_noise * dt*dt*dt*dt / 4;
+        Q(1,3) = process_noise * dt*dt*dt / 2;
+        Q(2,0) = process_noise * dt*dt*dt / 2;
+        Q(2,2) = process_noise * dt*dt;
+        Q(3,1) = process_noise * dt*dt*dt / 2;
+        Q(3,3) = process_noise * dt*dt;
 
     // Loop over the m_tracks and predict the current location with constant velocity model
     for (int trkIdx = 0; trkIdx < m_numActiveTracks; trkIdx++)
     {
         int tf = m_activeList[trkIdx]; 
 
-        // State update equations. Position and Velocity. 
-        m_tracks.trackFiles[tf].predPos[0] = m_tracks.trackFiles[tf].estPos[0] + m_tracks.trackFiles[tf].estVel[0] * dt;
-        m_tracks.trackFiles[tf].predPos[1] = m_tracks.trackFiles[tf].estPos[1] + m_tracks.trackFiles[tf].estVel[1] * dt;
-
-        m_tracks.trackFiles[tf].predVel[0] = m_tracks.trackFiles[tf].estVel[0];
-        m_tracks.trackFiles[tf].predVel[1] = m_tracks.trackFiles[tf].estVel[1];
+        // Process Model
+        m_tracks.trackFiles[tf].predState = F * m_tracks.trackFiles[tf].estState;
 
         // Predict the Covariance Matrix
-        // COLUMN 0
-        m_tracks.trackFiles[tf].predCov[0][0] = m_tracks.trackFiles[tf].estCov[0][0] + m_tracks.trackFiles[tf].estCov[2][0] * dt
-                + m_tracks.trackFiles[tf].estCov[0][2] * dt + m_tracks.trackFiles[tf].estCov[2][2] * dt * dt + Q[0][0];
-
-        m_tracks.trackFiles[tf].predCov[0][1] = m_tracks.trackFiles[tf].estCov[0][1] + m_tracks.trackFiles[tf].estCov[2][1] * dt
-                + m_tracks.trackFiles[tf].estCov[0][3] * dt + m_tracks.trackFiles[tf].estCov[2][3] * dt * dt;
-
-        m_tracks.trackFiles[tf].predCov[0][2] = m_tracks.trackFiles[tf].estCov[0][2] + m_tracks.trackFiles[tf].estCov[2][2] * dt + Q[0][2];
-
-        m_tracks.trackFiles[tf].predCov[0][3] = m_tracks.trackFiles[tf].estCov[0][3] + m_tracks.trackFiles[tf].estCov[2][3] * dt;
-
-        // COLUMN 1
-        m_tracks.trackFiles[tf].predCov[1][0] = m_tracks.trackFiles[tf].estCov[1][0] + m_tracks.trackFiles[tf].estCov[3][0] * dt
-                + m_tracks.trackFiles[tf].estCov[1][2] * dt + m_tracks.trackFiles[tf].estCov[3][2] * dt * dt;
-
-        m_tracks.trackFiles[tf].predCov[1][1] = m_tracks.trackFiles[tf].estCov[1][1] + m_tracks.trackFiles[tf].estCov[3][1] * dt
-                + m_tracks.trackFiles[tf].estCov[1][3] * dt + m_tracks.trackFiles[tf].estCov[3][3] * dt * dt + Q[1][1];
-
-        m_tracks.trackFiles[tf].predCov[1][2] = m_tracks.trackFiles[tf].estCov[1][2] + m_tracks.trackFiles[tf].estCov[3][2] * dt;
-
-        m_tracks.trackFiles[tf].predCov[1][3] = m_tracks.trackFiles[tf].estCov[1][3] + m_tracks.trackFiles[tf].estCov[3][3] * dt + Q[1][3];
-
-        // COLUMN 2
-        m_tracks.trackFiles[tf].predCov[2][0] = m_tracks.trackFiles[tf].estCov[2][0] + m_tracks.trackFiles[tf].estCov[2][2] * dt + Q[2][0];
-
-        m_tracks.trackFiles[tf].predCov[2][1] = m_tracks.trackFiles[tf].estCov[2][1] + m_tracks.trackFiles[tf].estCov[2][3] * dt;
-
-        m_tracks.trackFiles[tf].predCov[2][2] = m_tracks.trackFiles[tf].estCov[2][2] + Q[2][2];
-
-        m_tracks.trackFiles[tf].predCov[2][3] = m_tracks.trackFiles[tf].estCov[2][3];
-
-        // COLUMN 3
-        m_tracks.trackFiles[tf].predCov[3][0] = m_tracks.trackFiles[tf].estCov[3][0] + m_tracks.trackFiles[tf].estCov[3][2] * dt;
-
-        m_tracks.trackFiles[tf].predCov[3][1] = m_tracks.trackFiles[tf].estCov[3][1] + m_tracks.trackFiles[tf].estCov[3][3] * dt + Q[3][1];
-
-        m_tracks.trackFiles[tf].predCov[3][2] = m_tracks.trackFiles[tf].estCov[3][2];
-
-        m_tracks.trackFiles[tf].predCov[3][3] = m_tracks.trackFiles[tf].estCov[3][3] + Q[3][3];
+        m_tracks.trackFiles[tf].predCov = F * m_tracks.trackFiles[tf].estCov * F.transpose() + Q;
     }
 }
 
@@ -98,60 +55,31 @@ void TrackFileMgr::updateTrackEstPosition()
     for (int trkIdx = 0; trkIdx < m_numActiveTracks; trkIdx++)
     {
         int tf = m_activeList[trkIdx];
-        if (m_tracks.trackFiles[tf].corrDet != -1)
+        if (m_tracks.trackFiles[tf].corrDet == NO_CORRELATION)
+        {
+            m_tracks.trackFiles[tf].estState = m_tracks.trackFiles[tf].predState;
+            m_tracks.trackFiles[tf].estCov = m_tracks.trackFiles[tf].predCov;
+
+        }
+        else if (m_tracks.trackFiles[tf].corrDet != NO_CORRELATION)
         {
             // Update the track state estimate with the detection information
             
             // Compute the Kalman Gain
-            vector<vector<double>> HPH_tPlusR(2, vector<double>(2, 0.0));
-            HPH_tPlusR[0][0] = 1 / (m_tracks.trackFiles[tf].predCov[0][0] + m_dets.detList[m_tracks.trackFiles[tf].corrDet].measCov[0][0]);
-            HPH_tPlusR[1][1] = 1 / (m_tracks.trackFiles[tf].predCov[1][1] + m_dets.detList[m_tracks.trackFiles[tf].corrDet].measCov[1][1]);
+            MatrixXd S = MatrixXd::Zero(2,2);
+            S = m_tracks.H * m_tracks.trackFiles[tf].predCov * m_tracks.H.transpose() + m_dets.measCov;
+            m_tracks.trackFiles[tf].K = m_tracks.trackFiles[tf].predCov * m_tracks.H.transpose() * S.inverse(); 
 
-            vector<vector<double>> K(2 , vector<double>(4, 0.0));
-            K[0][0] = HPH_tPlusR[0][0] * m_tracks.trackFiles[tf].predCov[0][0];
-            K[0][1] = HPH_tPlusR[0][0] * m_tracks.trackFiles[tf].predCov[0][1];
-            K[0][2] = HPH_tPlusR[0][0] * m_tracks.trackFiles[tf].predCov[0][2];
-            K[0][3] = HPH_tPlusR[0][0] * m_tracks.trackFiles[tf].predCov[0][3];
+            // Calculate the residual
+            MatrixXd residual(2,1);
+            residual(0) = m_dets.detList[m_tracks.trackFiles[tf].corrDet].pos[0] - m_tracks.trackFiles[tf].predState(0);
+            residual(1) = m_dets.detList[m_tracks.trackFiles[tf].corrDet].pos[1] - m_tracks.trackFiles[tf].predState(1);
 
-            K[1][0] = HPH_tPlusR[1][1] * m_tracks.trackFiles[tf].predCov[1][0];
-            K[1][1] = HPH_tPlusR[1][1] * m_tracks.trackFiles[tf].predCov[1][1];
-            K[1][2] = HPH_tPlusR[1][1] * m_tracks.trackFiles[tf].predCov[1][2];
-            K[1][3] = HPH_tPlusR[1][1] * m_tracks.trackFiles[tf].predCov[1][3];
+            // Compute the Track Estimated Position
+            m_tracks.trackFiles[tf].estState = m_tracks.trackFiles[tf].predState + m_tracks.trackFiles[tf].K * residual;
 
-            // // Calculate the residual
-            double residualX = m_dets.detList[m_tracks.trackFiles[tf].corrDet].pos[0] - m_tracks.trackFiles[tf].predPos[0];
-            double residualY = m_dets.detList[m_tracks.trackFiles[tf].corrDet].pos[1] - m_tracks.trackFiles[tf].predPos[1];
-
-            // // Compute the Track Estimated Position
-            m_tracks.trackFiles[tf].estPos[0] = m_tracks.trackFiles[tf].predPos[0] + K[0][0] * residualX + K[1][0] * residualY;
-            m_tracks.trackFiles[tf].estPos[1] = m_tracks.trackFiles[tf].predPos[1] + K[0][1] * residualX + K[1][1] * residualY;
-            m_tracks.trackFiles[tf].estVel[0] = m_tracks.trackFiles[tf].predVel[0] + K[0][2] * residualX + K[1][2] * residualY;
-            m_tracks.trackFiles[tf].estVel[1] = m_tracks.trackFiles[tf].predVel[1] + K[0][3] * residualX + K[1][3] * residualY;
-
-            // // Compute the Estimated Covariance Values
-            // COL 0
-            m_tracks.trackFiles[tf].estCov[0][0] = (1 - K[0][0]) * m_tracks.trackFiles[tf].predCov[0][0] +       K[1][0] * m_tracks.trackFiles[tf].predCov[0][1];
-            m_tracks.trackFiles[tf].estCov[0][1] = K[0][1]       * m_tracks.trackFiles[tf].predCov[0][0] + (1 - K[1][1]) * m_tracks.trackFiles[tf].predCov[0][1];
-            m_tracks.trackFiles[tf].estCov[0][2] = K[0][2]       * m_tracks.trackFiles[tf].predCov[0][0] +       K[1][2] * m_tracks.trackFiles[tf].predCov[0][1] + m_tracks.trackFiles[tf].predCov[0][2];
-            m_tracks.trackFiles[tf].estCov[0][3] = K[0][3]       * m_tracks.trackFiles[tf].predCov[0][0] +       K[1][3] * m_tracks.trackFiles[tf].predCov[0][1] + m_tracks.trackFiles[tf].predCov[0][3];
-
-            // COL 1
-            m_tracks.trackFiles[tf].estCov[1][0] = (1 - K[0][0]) * m_tracks.trackFiles[tf].predCov[1][0] +       K[1][0] * m_tracks.trackFiles[tf].predCov[1][1];
-            m_tracks.trackFiles[tf].estCov[1][1] = K[0][1]       * m_tracks.trackFiles[tf].predCov[1][0] + (1 - K[1][1]) * m_tracks.trackFiles[tf].predCov[1][1];
-            m_tracks.trackFiles[tf].estCov[1][2] = K[0][2]       * m_tracks.trackFiles[tf].predCov[1][0] +       K[1][2] * m_tracks.trackFiles[tf].predCov[1][1] + m_tracks.trackFiles[tf].predCov[1][2];
-            m_tracks.trackFiles[tf].estCov[1][3] = K[0][3]       * m_tracks.trackFiles[tf].predCov[1][0] +       K[1][3] * m_tracks.trackFiles[tf].predCov[1][1] + m_tracks.trackFiles[tf].predCov[1][3];
-
-            // COL 2
-            m_tracks.trackFiles[tf].estCov[2][0] = (1 - K[0][0]) * m_tracks.trackFiles[tf].predCov[2][0] +       K[1][0] * m_tracks.trackFiles[tf].predCov[2][1];
-            m_tracks.trackFiles[tf].estCov[2][1] = K[0][1]       * m_tracks.trackFiles[tf].predCov[2][0] + (1 - K[1][1]) * m_tracks.trackFiles[tf].predCov[2][1];
-            m_tracks.trackFiles[tf].estCov[2][2] = K[0][2]       * m_tracks.trackFiles[tf].predCov[2][0] +       K[1][2] * m_tracks.trackFiles[tf].predCov[2][1] + m_tracks.trackFiles[tf].predCov[2][2];
-            m_tracks.trackFiles[tf].estCov[2][3] = K[0][3]       * m_tracks.trackFiles[tf].predCov[2][0] +       K[1][3] * m_tracks.trackFiles[tf].predCov[2][1] + m_tracks.trackFiles[tf].predCov[2][3];
-
-            // COL 3
-            m_tracks.trackFiles[tf].estCov[3][0] = (1 - K[0][0]) * m_tracks.trackFiles[tf].predCov[3][0] +       K[1][0] * m_tracks.trackFiles[tf].predCov[3][1];
-            m_tracks.trackFiles[tf].estCov[3][1] = K[0][1]       * m_tracks.trackFiles[tf].predCov[3][0] + (1 - K[1][1]) * m_tracks.trackFiles[tf].predCov[3][1];
-            m_tracks.trackFiles[tf].estCov[3][2] = K[0][2]       * m_tracks.trackFiles[tf].predCov[3][0] +       K[1][2] * m_tracks.trackFiles[tf].predCov[3][1] + m_tracks.trackFiles[tf].predCov[3][2];
-            m_tracks.trackFiles[tf].estCov[3][3] = K[0][3]       * m_tracks.trackFiles[tf].predCov[3][0] +       K[1][3] * m_tracks.trackFiles[tf].predCov[3][1] + m_tracks.trackFiles[tf].predCov[3][3];
+            // Compute the Estimate Covariance 
+            m_tracks.trackFiles[tf].estCov = (MatrixXd::Identity(4,4) - m_tracks.trackFiles[tf].K * m_tracks.H) * m_tracks.trackFiles[tf].predCov;
         }
     }
        
@@ -206,25 +134,15 @@ void TrackFileMgr::attemptOpenTracks()
                     m_tracks.trackFiles[track].corrDet = det;
                     // m_tracks.trackFiles[track].persistance++;
 
-                    m_tracks.trackFiles[track].estPos[0] = m_dets.detList[det].pos[0];
-                    m_tracks.trackFiles[track].estPos[1] = m_dets.detList[det].pos[1];
-                    m_tracks.trackFiles[track].predPos[0] = m_dets.detList[det].pos[0];
-                    m_tracks.trackFiles[track].predPos[1] = m_dets.detList[det].pos[1];
+                    m_tracks.trackFiles[track].estState(0)  = m_dets.detList[det].pos[0];
+                    m_tracks.trackFiles[track].estState(1)  = m_dets.detList[det].pos[1];
+                    m_tracks.trackFiles[track].predState(0) = m_dets.detList[det].pos[0];
+                    m_tracks.trackFiles[track].predState(1) = m_dets.detList[det].pos[1];
 
-                    m_tracks.trackFiles[track].predVel[0] = 0.0;
-                    m_tracks.trackFiles[track].predVel[1] = 0.0;
-                    m_tracks.trackFiles[track].estVel[0] = 0.0;
-                    m_tracks.trackFiles[track].estVel[1] = 0.0;
-
-                    m_tracks.trackFiles[track].predCov[0][0] = STD_POS*STD_POS;
-                    m_tracks.trackFiles[track].predCov[1][1] = STD_POS*STD_POS;
-                    m_tracks.trackFiles[track].predCov[2][2] = STD_VEL*STD_VEL;
-                    m_tracks.trackFiles[track].predCov[3][3] = STD_VEL*STD_VEL;
-
-                    m_tracks.trackFiles[track].estCov[0][0] = STD_POS*STD_POS;
-                    m_tracks.trackFiles[track].estCov[1][1] = STD_POS*STD_POS;
-                    m_tracks.trackFiles[track].estCov[2][2] = STD_VEL*STD_VEL;
-                    m_tracks.trackFiles[track].estCov[3][3] = STD_VEL*STD_VEL;
+                    m_tracks.trackFiles[track].predState(2) = 0.0;
+                    m_tracks.trackFiles[track].predState(3) = 0.0;
+                    m_tracks.trackFiles[track].estState(2)  = 0.0;
+                    m_tracks.trackFiles[track].estState(3)  = 0.0;
 
                     m_tracks.numTracks++;
                     break;

@@ -29,8 +29,8 @@ else:
 with open(csv_path, 'r') as file:
     lines = file.readlines()
 
-ROW = 511
-COL = 511
+ROW = 1920
+COL = 1080
 bits = 1024
 # Define the parameters of the Gaussian
 x = np.linspace(0, ROW, bits)
@@ -87,6 +87,7 @@ def update(frame):
                 totalDist += distribution
             
     plt.contourf(X, Y, totalDist, cmap='viridis')
+    plt.gca().invert_yaxis()
     totalDist = np.zeros_like(distribution)
 
     return ax,
