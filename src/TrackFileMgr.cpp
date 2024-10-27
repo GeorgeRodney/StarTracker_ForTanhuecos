@@ -216,11 +216,15 @@ void TrackFileMgr::attemptOpenTracks()
                     m_tracks.trackFiles[track].estVel[0] = 0.0;
                     m_tracks.trackFiles[track].estVel[1] = 0.0;
 
-                    m_tracks.trackFiles[track].predCov[0][0] = 5.0;
-                    m_tracks.trackFiles[track].predCov[1][1] = 1.0;
+                    m_tracks.trackFiles[track].predCov[0][0] = STD_POS*STD_POS;
+                    m_tracks.trackFiles[track].predCov[1][1] = STD_POS*STD_POS;
+                    m_tracks.trackFiles[track].predCov[2][2] = STD_VEL*STD_VEL;
+                    m_tracks.trackFiles[track].predCov[3][3] = STD_VEL*STD_VEL;
 
-                    m_tracks.trackFiles[track].estCov[0][0] = 5.0;
-                    m_tracks.trackFiles[track].estCov[1][1] = 1.0;
+                    m_tracks.trackFiles[track].estCov[0][0] = STD_POS*STD_POS;
+                    m_tracks.trackFiles[track].estCov[1][1] = STD_POS*STD_POS;
+                    m_tracks.trackFiles[track].estCov[2][2] = STD_VEL*STD_VEL;
+                    m_tracks.trackFiles[track].estCov[3][3] = STD_VEL*STD_VEL;
 
                     m_tracks.numTracks++;
                     break;

@@ -69,6 +69,5 @@ with open(output_path, 'w') as f:  # Use .txt to denote no commas
     for detection in detections:
         f.write(f"{detection[0]} {detection[1]} {detection[2]}\n")  # Write as "frame detX detY"
 
-
 cap.release()
 cv2.destroyAllWindows()

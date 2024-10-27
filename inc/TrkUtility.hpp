@@ -22,8 +22,8 @@ using namespace std;
 #define STATE_MAX 200
 #define DET_MAX   100
 #define ACCEL_STD 3
-#define STD_POS 1.66
-#define STD_VEL 25
+#define STD_POS 5
+#define STD_VEL 10
 #define STD_MEAS 0.33
 
 enum ValidDet
@@ -118,11 +118,18 @@ public:
 
         for (int8_t i = 0; i < 4; i++)
         {
-            predCov[i] = {0.0, 0.0, 0.0, 0.0};
-            estCov[i] = {0.0, 0.0, 0.0, 0.0};
             K[i] = {0.0, 0.0};
         }
 
+        predCov[0][0] = STD_POS*STD_POS;
+        predCov[1][1] = STD_POS*STD_POS;
+        predCov[2][2] = STD_VEL*STD_VEL;
+        predCov[3][3] = STD_VEL*STD_VEL;
+
+        estCov[0][0] = STD_POS*STD_POS;
+        estCov[1][1] = STD_POS*STD_POS;
+        estCov[2][2] = STD_VEL*STD_VEL;
+        estCov[3][3] = STD_VEL*STD_VEL;
         corrDet = -1;
         state   = CLOSED;
         persistance = 0;

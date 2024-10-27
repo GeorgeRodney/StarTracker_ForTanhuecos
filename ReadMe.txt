@@ -19,4 +19,11 @@ TODO LIST
     [X] Velocity isnt being filtered into state estimation 
     [X] Create visualization tool with python
     [X] Make the dets and tracks structure a member variable for the TFM
-    [O] Fix binning association algorithm - Detections one is associating with multiple converged tracks
+    [X] Fix binning association algorithm - Detections one is associating with multiple converged tracks
+    [O] Gate the other association algorithms
+    [O] Create GNN algorithm
+    [O] Add single run command
+        [O] 
+    [O] Change explicit matrix multiplication to Armadillo / Eigen
+    [O] INVESTIGATE WHY THE COVARIANCE MATRIX IS SHITTY
+

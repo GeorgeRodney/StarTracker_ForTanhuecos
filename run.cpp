@@ -7,8 +7,8 @@ int main()
 {
     TrackFileMgr tracker_;
 
-    // ifstream detections("detections.csv");
-    ifstream detections("detections_from_video.csv");
+    ifstream detections("detections.csv");
+    // ifstream detections("detections_from_video.csv");
 
     if (!detections.is_open())
     {
@@ -138,7 +138,14 @@ int main()
         for (int track = 0; track < tracker_.m_numActiveTracks; track++)
         {
             int trackFile = tracker_.m_activeList[track];
-            std::cout << tracker_.m_frame << "," << 1 << "," << tracker_.m_tracks.trackFiles[trackFile].estPos[0] << "," << tracker_.m_tracks.trackFiles[trackFile].estPos[1] << "," << tracker_.m_tracks.trackFiles[trackFile].state << std::endl;
+            std::cout << tracker_.m_frame << ","
+                         << 1 << "," 
+                         << tracker_.m_tracks.trackFiles[trackFile].estPos[0] << "," 
+                         << tracker_.m_tracks.trackFiles[trackFile].estPos[1] << "," 
+                         << tracker_.m_tracks.trackFiles[trackFile].state << "," 
+                         << tracker_.m_tracks.trackFiles[trackFile].estCov[0][0] << "," 
+                         << tracker_.m_tracks.trackFiles[trackFile].estCov[1][1] << "," 
+                         << std::endl;
         }
 
 
