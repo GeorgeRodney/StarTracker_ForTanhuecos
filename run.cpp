@@ -103,17 +103,6 @@ int main()
         >----------------------------------------------------------------------------
         */
         tracker_.binningAssociate();
-        // tracker_.hungarianAssociate();
-        // for (int track = 0; track < tracker_.m_numActiveTracks; track++)
-        // {
-        //     int tf = tracker_.m_activeList[track];
-        //     std::cout << std::setw(10) << tracker_.m_frame 
-        //                 << "," << std::setw(10) << tracker_.m_tracks.trackFiles[tf].predPos[0] 
-        //                     << "," << std::setw(10) << tracker_.m_tracks.trackFiles[tf].predPos[1] 
-        //                         << "," << std::setw(10) << tracker_.m_tracks.trackFiles[tf].state 
-        //                             << "," << std::setw(10) << tracker_.m_tracks.trackFiles[tf].corrDet 
-        //                                 << std::endl;
-        // }
 
         /*>----------------------------------------------------------------------------
         |
