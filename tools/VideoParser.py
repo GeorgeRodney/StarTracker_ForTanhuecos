@@ -22,7 +22,7 @@ params.filterByInertia = False
 detector = cv2.SimpleBlobDetector_create(params)
 
 ################ Open video file #########################
-video_path = '~/Desktop/projects/AssociatorTest/StarCatalog.mp4'
+video_path = '~/Desktop/projects/AssociatorTest/StarCatalog/accelerating_stars.mp4'
 video_path = os.path.expanduser(video_path)
 cap = cv2.VideoCapture(video_path)
 

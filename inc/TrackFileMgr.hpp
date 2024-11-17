@@ -15,7 +15,7 @@ public:
     vector<int> m_activeList;
 
     void updateFrameVariables();
-    void predictTrackLocationAndGate(double dt);
+    void predictTrackLocation(double dt);
     void updateTrackEstPosition();
     void correctTrackState(double dt);
     void checkPersistency();

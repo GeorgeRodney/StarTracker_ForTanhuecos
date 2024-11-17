@@ -74,7 +74,7 @@ def update(frame):
     mu = (0, 0)
     P = np.array([[0.1, 0], [0, 0.1]])
     totalDist = fi.calculate_gaussian_2d(mu, P, bits, COL, ROW)
-    VIS_SCALE = 1.0
+    VIS_SCALE = 100.0
 
     if scene[frame].frameValid:
         for track in range(len(scene[frame].tracks)):
@@ -87,7 +87,7 @@ def update(frame):
                 totalDist += distribution
             
     plt.contourf(X, Y, totalDist, cmap='viridis')
-    plt.gca().invert_yaxis()
+    # plt.gca().invert_yaxis()  # Flip the y-axis
     totalDist = np.zeros_like(distribution)
 
     return ax,
@@ -96,7 +96,7 @@ def update(frame):
 ani = animation.FuncAnimation(fig, update, frames=len(scene), interval=50, blit=False)
 
 # Optionally, save the animation as a .avi file
-vid_output_path = '~/Desktop/projects/AssociatorTest/output/EstimatedDistribution.avi'
+vid_output_path = '~/Desktop/projects/AssociatorTest/output/TrackerDistributionAccelerationV1.mp4'
 vid_output_path = os.path.expanduser(vid_output_path)
 ani.save(vid_output_path, writer='ffmpeg', fps=30)
 

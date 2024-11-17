@@ -16,7 +16,7 @@ TrackFileMgr::~TrackFileMgr()
 {
 }
 
-void TrackFileMgr::predictTrackLocationAndGate(double dt)
+void TrackFileMgr::predictTrackLocation(double dt)
 {
     // STATE TRANSITION MATRIX F
         MatrixXd F = MatrixXd::Zero(4,4);
@@ -82,7 +82,6 @@ void TrackFileMgr::updateTrackEstPosition()
             m_tracks.trackFiles[tf].estCov = (MatrixXd::Identity(4,4) - m_tracks.trackFiles[tf].K * m_tracks.H) * m_tracks.trackFiles[tf].predCov;
         }
     }
-       
     
 }
 
