@@ -26,4 +26,7 @@ TODO LIST
         [O] 
     [O] Change explicit matrix multiplication to Armadillo / Eigen
     [O] INVESTIGATE WHY THE COVARIANCE MATRIX IS SHITTY
+    [O] Add acceleration
+    [O] Add history buffer
+    [O] Add basic performance metric
 
