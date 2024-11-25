@@ -20,7 +20,7 @@ Get project up and running:
 
 -4 Build the project
     - Create build folder and build project
-    - Run these commands from where you cloned the repo
+    - Run these commands from where you cloned the repo (These might be different based on Mac terminal commands)
         - mkdir build
         - cd build
         - cmake ..
