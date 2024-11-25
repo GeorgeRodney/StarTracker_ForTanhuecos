@@ -1,5 +1,8 @@
 #include "TrackFileMgr.hpp"
 
+// Track Info Publishing
+#include <chrono>
+
 using namespace std;
 
 
@@ -75,6 +78,8 @@ int main()
         |
         >----------------------------------------------------------------------------
         */
+
+        auto start_time = std::chrono::high_resolution_clock::now();
 
         /*
         >----------------------------------------------------------------------------

@@ -6,6 +6,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 # Find the Eigen3 package
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(Boost REQUIRED COMPONENTS system)
 
 # Define source and header files
 set(sources
@@ -24,6 +25,7 @@ set(headers
 add_executable(run run.cpp ${sources} ${headers})
 # Link Eigen to 'run'
 target_link_libraries(run Eigen3::Eigen)
+target_link_libraries(run ${Boost_LIBRARIES})
 
 # Add executable for 'writeState'
 add_executable(writeState writeState.cpp)
