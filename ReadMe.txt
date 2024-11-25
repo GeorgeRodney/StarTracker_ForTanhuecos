@@ -1,3 +1,33 @@
+Get project up and running:
+    This is a difficult process to get set up. Thats just the nature of the beast.
+    If you are able to grind through this part you will be set up with a build environment
+    that is standard in the software development career field. Be patient with yourself.
+    Setting up a development environment is difficult. Please reach out as soon as you get stuck. 
+
+-1 Install VSCode for Mac - https://code.visualstudio.com/Download
+
+-2 Install VSCode extensions:
+    - CMake Tools
+    - CMake
+    - C/C++ by microsoft
+    - Python by Microsoft
+    - Python Debugger by Microsoft
+
+-3 Download StarTracker_ForTanhuecos repo
+    - Request access to my Github Repo: https://github.com/GeorgeRodney/StarTracker_ForTanhuecos
+    - Set up your SSH keys (There are tutorials for this online. Call me if you are having trouble with this)
+    - Clone the repo into your working folder on your computer
+
+-4 Build the project
+    - Create build folder and build project
+    - Run these commands from where you cloned the repo
+        - mkdir build
+        - cd build
+        - cmake ..
+        - make
+
+-5 Call me when you get here. 
+
 Predict Step:
     Predict the new location of tracks based on their estimated Position and velocity.
     Input:  estimated Position, velocity
