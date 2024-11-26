@@ -91,12 +91,14 @@ def update(frame):
             for track in scene[frame].tracks:
                 if track.status == 1:
                     plt.scatter(track.X, track.Y, edgecolor='blue', facecolor='none', s=100, label='OPEN TRACK', marker='o', linewidths=2)
+                    plt.text(track.X + 50.0, track.Y, f'{track.uniqueId}', color='blue', fontsize=20, ha='center', va='bottom')
                 elif track.status == 2:
                     
                     ######################################################################################################################################
                     #CHANGLE THIS LINE JOSH. Can you make the video look cooler? Try different colors and shapes.
 
                     plt.scatter(track.X, track.Y, edgecolor='green', facecolor='none', s=200, label='CONVERGED TRACK', marker='^', linewidths=2)
+                    plt.text(track.X + 50.0, track.Y, f'{track.uniqueId}', color='blue', fontsize=20, ha='center', va='baseline')
 
                     ######################################################################################################################################
     return ax,
@@ -105,7 +107,7 @@ def update(frame):
 ani = animation.FuncAnimation(fig, update, frames=len(scene), interval=50, blit=False)
 
 # Optionally, save the animation as a .avi file
-vid_output_path = '~/Desktop/projects/AssociatorTest/output/TracksAccelerationStarsV1.avi'
+vid_output_path = '~/Desktop/projects/AssociatorTest/output/TracksAccelerationStarsV1.mp4'
 vid_output_path = os.path.expanduser(vid_output_path)
 ani.save(vid_output_path, writer='ffmpeg', fps=30)
 
