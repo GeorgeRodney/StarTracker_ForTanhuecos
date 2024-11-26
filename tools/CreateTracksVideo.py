@@ -34,12 +34,14 @@ with open(csv_path, 'r') as file:
     lines = file.readlines()
 
 pattern = r'(-?\d+(?:\.\d+)?)'
+# pattern = r'-?\d+(?:\.\d+)?'
+
 
 # Load line data into structures
 for line in range(len(lines)):
 
     # temp DET   LINE: frame, ID, X, Y
-    # temp TRACK LINE: frame, ID, X, Y, Status
+    # temp TRACK LINE: frame, ID, X, Y, Status, P00, P11, uniqueId
     temp = re.findall(pattern, lines[line])
     temp = [float(num) for num in temp]
     scene[int(temp[0])].set_frame_valid(True)
@@ -50,7 +52,7 @@ for line in range(len(lines)):
         scene[int(temp[0])].set_det_valid(True)
 
     if (int(temp[1]) == TRACK):
-        temp_track = fi.Track(temp[4], temp[2], temp[3], temp[5], temp[6])
+        temp_track = fi.Track(temp[4], temp[2], temp[3], temp[5], temp[6], temp[7])
         scene[int(temp[0])].append_track(temp_track)
         scene[int(temp[0])].set_track_valid(True)
 
@@ -90,8 +92,13 @@ def update(frame):
                 if track.status == 1:
                     plt.scatter(track.X, track.Y, edgecolor='blue', facecolor='none', s=100, label='OPEN TRACK', marker='o', linewidths=2)
                 elif track.status == 2:
+                    
+                    ######################################################################################################################################
+                    #CHANGLE THIS LINE JOSH. Can you make the video look cooler? Try different colors and shapes.
+
                     plt.scatter(track.X, track.Y, edgecolor='green', facecolor='none', s=200, label='CONVERGED TRACK', marker='^', linewidths=2)
-                    # converged_track_positions.append((track.X, track.Y))
+
+                    ######################################################################################################################################
     return ax,
 
 # Create the animation using FuncAnimation

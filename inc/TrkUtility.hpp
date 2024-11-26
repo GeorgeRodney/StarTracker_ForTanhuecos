@@ -161,7 +161,7 @@ class TrackFile
 
     TrackFile(): trackFiles(TRACK_MAX),
                  H(MatrixXd::Zero(2,4)),
-                 m_numTimesOpened(0)
+                 m_numTimesOpened(TRACK_MAX)
     {
         H(0,0) = 1.0;
         H(1,1) = 1.0;

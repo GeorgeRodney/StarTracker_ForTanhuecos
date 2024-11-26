@@ -10,7 +10,7 @@ using namespace std;
 int main()
 {
     TrackFileMgr tracker_;
-    AsyncTrackingMetricsPublisher metrics_publisher_;
+    // AsyncTrackingMetricsPublisher metrics_publisher_;
 
     // ifstream detections("detections.csv");
     ifstream detections("detections_from_video.csv");
@@ -134,23 +134,25 @@ int main()
         >----------------------------------------------------------------------------*/
         // std::map<int, int> track_associations = get_current_associations();
         // metrics_publisher_.queue_frame_data(tracker_.m_frame, track_associations, processing_time);
-        // for (int det = 0; det < tracker_.m_dets.numDets; det++)
-        // {
-        //     std::cout << tracker_.m_frame << "," << 0 << "," << tracker_.m_dets.detList[det].pos[0] << "," << tracker_.m_dets.detList[det].pos[1] << "," << -1 << std::endl;
-        // }
+        for (int det = 0; det < tracker_.m_dets.numDets; det++)
+        {
+            std::cout << tracker_.m_frame << "," << 0 << "," << tracker_.m_dets.detList[det].pos[0] << "," << tracker_.m_dets.detList[det].pos[1] << "," << -1 << std::endl;
+        }
 
-        // for (int track = 0; track < tracker_.m_numActiveTracks; track++)
-        // {
-        //     int trackFile = tracker_.m_activeList[track];
-        //     std::cout << tracker_.m_frame << ","
-        //                  << 1 << "," 
-        //                  << tracker_.m_tracks.trackFiles[trackFile].estState(0) << "," 
-        //                  << tracker_.m_tracks.trackFiles[trackFile].estState(1) << "," 
-        //                  << tracker_.m_tracks.trackFiles[trackFile].state << "," 
-        //                  << tracker_.m_tracks.trackFiles[trackFile].estCov(0,0) << "," 
-        //                  << tracker_.m_tracks.trackFiles[trackFile].estCov(1,1) << "," 
-        //                  << std::endl;
-        // }
+        for (int track = 0; track < tracker_.m_numActiveTracks; track++)
+        {
+            int trackFile = tracker_.m_activeList[track];
+
+            std::cout   << tracker_.m_frame << ","
+                        << 1 << "," 
+                        << tracker_.m_tracks.trackFiles[trackFile].estState(0) << "," 
+                        << tracker_.m_tracks.trackFiles[trackFile].estState(1) << ","                          
+                        << tracker_.m_tracks.trackFiles[trackFile].state << "," 
+                        << tracker_.m_tracks.trackFiles[trackFile].estCov(0,0) << "," 
+                        << tracker_.m_tracks.trackFiles[trackFile].estCov(1,1) << "," 
+                        << tracker_.m_tracks.trackFiles[trackFile].uniqueId
+                        << std::endl;
+        }
 
         tracker_.m_frame++;
         tracker_.frameCleanUp();

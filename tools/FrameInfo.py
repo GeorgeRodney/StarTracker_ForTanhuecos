@@ -10,12 +10,12 @@ class Detection:
         self.Y = yVal
 
 class Track:
-    def __init__(self, state, xVal, yVal, P00, P11):
+    def __init__(self, state, xVal, yVal, P00, P11, uniqueId):
         self.X = xVal
         self.Y = yVal
         self.P00 = P00
         self.P11 = P11
-
+        self.uniqueId = uniqueId
         self.status = state
 
     def update_pos(self, xVal, yVal):
