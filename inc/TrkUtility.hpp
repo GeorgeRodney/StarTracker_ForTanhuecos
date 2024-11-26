@@ -77,12 +77,14 @@ public:
     uint8_t persistance = 0;
     double gate;
     double procNoise;
+    int32_t uniqueId;
     Track():    predState(MatrixXd::Zero(4,1)),
                 estState(MatrixXd::Zero(4,1)),
                 predCov(MatrixXd::Zero(4,4)),
                 estCov(MatrixXd::Zero(4,4)),
                 gate(10.0),
                 procNoise(ACCEL_STD),
+                uniqueId(-1),
                 K(MatrixXd::Zero(4,2))
     {
         predCov(0,0) = STD_POS*STD_POS;
@@ -116,10 +118,11 @@ public:
         estCov(2,2) = STD_VEL*STD_VEL;
         estCov(3,3) = STD_VEL*STD_VEL;
 
-        corrDet = -1;
-        state   = CLOSED;
+        corrDet     = -1;
+        state       = CLOSED;
         persistance = 0;
-        gate    = 10.0;
+        gate        = 10.0;
+        uniqueId    = -1;
     }
     
     void cleanCorrelated()
@@ -154,9 +157,11 @@ class TrackFile
     vector<Track> trackFiles;
     int numTracks = 0;
     MatrixXd H;
+    vector<int> m_numTimesOpened;
 
     TrackFile(): trackFiles(TRACK_MAX),
-                 H(MatrixXd::Zero(2,4))
+                 H(MatrixXd::Zero(2,4)),
+                 m_numTimesOpened(0)
     {
         H(0,0) = 1.0;
         H(1,1) = 1.0;

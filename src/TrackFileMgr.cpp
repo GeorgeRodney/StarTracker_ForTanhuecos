@@ -144,6 +144,11 @@ void TrackFileMgr::attemptOpenTracks()
                     m_tracks.trackFiles[track].estState(3)  = 0.0;
 
                     m_tracks.numTracks++;
+
+                    // Assign UniqueId
+                    m_tracks.trackFiles[track].uniqueId = track + m_tracks.m_numTimesOpened[track] * TRACK_MAX;
+                    m_tracks.m_numTimesOpened[track]++;
+
                     break;
                 }
             }
