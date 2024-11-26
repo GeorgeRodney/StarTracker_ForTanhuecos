@@ -24,7 +24,7 @@ using namespace std;
 #define ACCEL_STD 3
 #define STD_POS 5
 #define STD_VEL 10
-#define STD_MEAS 0.33
+#define STD_MEAS 1
 #define NO_CORRELATION -1
 
 enum ValidDet

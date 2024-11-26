@@ -12,8 +12,8 @@ int main()
     TrackFileMgr tracker_;
     // AsyncTrackingMetricsPublisher metrics_publisher_;
 
-    // ifstream detections("detections.csv");
-    ifstream detections("detections_from_video.csv");
+    ifstream detections("detections.csv");
+    // ifstream detections("detections_from_video.csv");
 
     if (!detections.is_open())
     {

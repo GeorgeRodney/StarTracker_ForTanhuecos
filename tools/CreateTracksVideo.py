@@ -12,6 +12,12 @@ import subprocess
 DET = 0
 TRACK = 1
 
+# FPA_ROW = 1080
+# FPA_COL = 1920
+
+FPA_ROW = 512
+FPA_COL = 512
+
 ######################### RUN TFM #################################
 # run_command = "cd ../build && ./run 2>&1 | tee ../output/test.csv"
 # subprocess.run(run_command, shell=True, check=True)
@@ -34,8 +40,6 @@ with open(csv_path, 'r') as file:
     lines = file.readlines()
 
 pattern = r'(-?\d+(?:\.\d+)?)'
-# pattern = r'-?\d+(?:\.\d+)?'
-
 
 # Load line data into structures
 for line in range(len(lines)):
@@ -61,8 +65,8 @@ for line in range(len(lines)):
 fig = plt.figure(figsize=(20, 10))
 ax = plt.gca()
 ax.set_facecolor('black')
-plt.xlim(0, 1920)
-plt.ylim(0, 1080)
+plt.xlim(0, FPA_COL)
+plt.ylim(0, FPA_ROW)
 plt.gca().invert_yaxis()
 
 ###############################################################
@@ -72,8 +76,8 @@ plt.gca().invert_yaxis()
 def update(frame):
     ax.cla()  # Clear the axis for the next frame
     ax.set_facecolor('black')
-    plt.xlim(0, 1920)
-    plt.ylim(0, 1080)
+    plt.xlim(0, FPA_COL)
+    plt.ylim(0, FPA_ROW)
     plt.gca().invert_yaxis()
 
     # if converged_track_positions:
@@ -107,8 +111,8 @@ def update(frame):
 ani = animation.FuncAnimation(fig, update, frames=len(scene), interval=50, blit=False)
 
 # Optionally, save the animation as a .avi file
-vid_output_path = '~/Desktop/projects/AssociatorTest/output/TracksAccelerationStarsV1.mp4'
+vid_output_path = '~/Desktop/projects/AssociatorTest/output/TracksSimulatedTruth.mp4'
 vid_output_path = os.path.expanduser(vid_output_path)
-ani.save(vid_output_path, writer='ffmpeg', fps=30)
+ani.save(vid_output_path, writer='ffmpeg', fps=5)
 
 plt.show()

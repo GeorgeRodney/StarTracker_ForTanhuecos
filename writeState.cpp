@@ -19,9 +19,14 @@ int main ()
     mt19937                     gen(rd());      // Mersenne Twister engine
     uniform_int_distribution<>  dis(0, FPA-1);
 
+    float                       sigma_meas = 1;
+    mt19937                     meas(rd());
+    uniform_real_distribution<>  R(0, sigma_meas);
+
+
     // Calculate the false alarm rate3
     int REAL_DETS       = 3;
-    int FALSE_DETS      = 10;
+    int FALSE_DETS      = 6;
     double false_rate   = FALSE_DETS / (FPA * FPA);
     int DET_SIZE        = REAL_DETS + FALSE_DETS;
     vector<Detection>   dets(DET_SIZE);
@@ -55,7 +60,7 @@ int main ()
 
         for (int i = 0; i < DET_SIZE; i ++)
         {
-            DETS << frame << "\t" << dets[i].pos[0] << "\t" << dets[i].pos[1] << endl;;
+            DETS << frame << "\t" << dets[i].pos[0] + R(meas) << "\t" << dets[i].pos[1] + R(meas) << endl;;
         }
 
         dets[TARGET]   = update_pos(dets[TARGET], vel1, dt);
