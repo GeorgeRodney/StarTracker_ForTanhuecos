@@ -50,13 +50,17 @@ TODO LIST
     [X] Create visualization tool with python
     [X] Make the dets and tracks structure a member variable for the TFM
     [X] Fix binning association algorithm - Detections one is associating with multiple converged tracks
+
     [O] Gate the other association algorithms
     [O] Create GNN algorithm
     [O] Add single run command
-        [O] 
-    [O] Change explicit matrix multiplication to Armadillo / Eigen
-    [O] INVESTIGATE WHY THE COVARIANCE MATRIX IS SHITTY
+
+    [X] Change explicit matrix multiplication to Armadillo / Eigen
+    [X] INVESTIGATE WHY THE COVARIANCE MATRIX IS SHITTY
     [O] Add acceleration
     [O] Add history buffer
     [O] Add basic performance metric
+        [X] Added unique ID to trackFiles
+        [X] Added truth ID to detections
+        [X] Added truth ID hand off from det to track during correlation
 

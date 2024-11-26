@@ -46,11 +46,13 @@ public:
     bool correlated;
     int corrTrack;
     int valid;
+    int truth_id;
 
     Detection():    pos(DEGREE, 0.0), 
                     correlated(false), 
                     corrTrack(-1),
-                    valid(INVALID_DET)
+                    valid(INVALID_DET),
+                    truth_id(-1)
     {
     };
 
@@ -61,6 +63,7 @@ public:
         correlated = false;
         corrTrack = -1;
         valid = INVALID_DET;
+        truth_id = -1;
     }
 };
 
@@ -78,6 +81,8 @@ public:
     double gate;
     double procNoise;
     int32_t uniqueId;
+    int truth_id;
+
     Track():    predState(MatrixXd::Zero(4,1)),
                 estState(MatrixXd::Zero(4,1)),
                 predCov(MatrixXd::Zero(4,4)),
@@ -85,6 +90,7 @@ public:
                 gate(10.0),
                 procNoise(ACCEL_STD),
                 uniqueId(-1),
+                truth_id(-1),
                 K(MatrixXd::Zero(4,2))
     {
         predCov(0,0) = STD_POS*STD_POS;
@@ -123,11 +129,13 @@ public:
         persistance = 0;
         gate        = 10.0;
         uniqueId    = -1;
+        truth_id    = -1;
     }
     
     void cleanCorrelated()
     {
         corrDet = -1;
+        truth_id = -1;
     }
 
 

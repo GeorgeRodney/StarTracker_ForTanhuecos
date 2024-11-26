@@ -38,6 +38,10 @@ int main ()
     dets[TARGET+1].pos[0] = 144; dets[TARGET+1].pos[1] = 300;
     dets[TARGET+2].pos[0] = 255; dets[TARGET+2].pos[1] = 255;
 
+    dets[TARGET].truth_id = 0;
+    dets[TARGET+1].truth_id = 1;
+    dets[TARGET+2].truth_id = 2;
+
     vector<double> vel1(2);
     vector<double> vel2(2);
     vector<double> vel3(2);
@@ -53,14 +57,18 @@ int main ()
     {
         for (int j = REAL_DETS; j < DET_SIZE; j++)
         {
-            dets[j].pos[0] = dis(gen); dets[j].pos[1] = dis(gen);    
+            dets[j].pos[0] = dis(gen); 
+            dets[j].pos[1] = dis(gen);
+            dets[j].truth_id = -1;    
         }
         // Update target position
         // dets[TARGET] = update_pos(dets[TARGET], vel1, dt);
 
         for (int i = 0; i < DET_SIZE; i ++)
         {
-            DETS << frame << "\t" << dets[i].pos[0] + R(meas) << "\t" << dets[i].pos[1] + R(meas) << endl;;
+            DETS << frame << "\t" << dets[i].pos[0] + R(meas) 
+                            << "\t" << dets[i].pos[1] + R(meas) 
+                                << "\t" << dets[i].truth_id << endl;;
         }
 
         dets[TARGET]   = update_pos(dets[TARGET], vel1, dt);

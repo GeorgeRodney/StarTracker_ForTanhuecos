@@ -73,6 +73,9 @@ void TrackFileMgr::binningAssociate()
             m_dets.detList[m_tracks.trackFiles[tf].corrDet].correlated = true;
             m_dets.detList[m_tracks.trackFiles[tf].corrDet].corrTrack = tf;
 
+            // Attach the truth ID
+            m_tracks.trackFiles[tf].truth_id = m_dets.detList[temp_det].truth_id;
+
             // Remove from lists
             trackHits[tf] = 0;
             tracksToDets[tf][0] = -1;
@@ -102,6 +105,9 @@ void TrackFileMgr::binningAssociate()
             m_tracks.trackFiles[tf].corrDet = minValIdx;
             m_dets.detList[m_tracks.trackFiles[tf].corrDet].correlated = true;
             m_dets.detList[m_tracks.trackFiles[tf].corrDet].corrTrack = tf;
+
+            // Attach the truth ID
+            m_tracks.trackFiles[tf].truth_id = m_dets.detList[minValIdx].truth_id;
 
             trackHits[tf] = 0; // Clear trackHits
         }

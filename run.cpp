@@ -24,13 +24,14 @@ int main()
     int frame;
     vector<double> xHold(2000, -1);
     vector<double> yHold(2000, -1);
+    vector<int>    truthHold(2000, -1);
     vector<double> frameHold(2000, -1);
 
     int idx = 0;
     int numFrames = -1;
-    double frameValue, xValue, yValue;
+    double frameValue, xValue, yValue, truthId;
 
-    while (detections >> frameValue >> xValue >> yValue) {
+    while (detections >> frameValue >> xValue >> yValue >> truthId) {
         if (frameValue != numFrames)
         {
             numFrames = frameValue;
@@ -38,6 +39,7 @@ int main()
         frameHold[idx] = frameValue;
         xHold[idx] = xValue;
         yHold[idx] = yValue;
+        truthHold[idx] = truthId;
         idx++;
     }
     numFrames++;
@@ -63,6 +65,7 @@ int main()
             {
                 tracker_.m_dets.detList[detIdx].pos[0] = xHold[idx];
                 tracker_.m_dets.detList[detIdx].pos[1] = yHold[idx];
+                tracker_.m_dets.detList[detIdx].truth_id = truthHold[idx];
                 tracker_.m_dets.detList[detIdx].valid  = VALID_DET;
                 detIdx++;
             }
