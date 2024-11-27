@@ -12,7 +12,7 @@ FPS = 60
 BACKGROUND_COLOR = (30, 30, 30)
 PATH_COLOR = (200, 0, 0)
 DETECTION_COLOR = (0, 255, 255)
-MAX_FALSE_ALARMS_PER_FRAME = 2  # Maximum number of false alarms per frame
+MAX_FALSE_ALARMS_PER_FRAME = 0  # Maximum number of false alarms per frame
 SAMPLING_DENSITY = 10  # Number of interpolated points between path points
 
 # Set up the display
@@ -48,7 +48,7 @@ def process_paths_to_detections(paths):
         for truth_id, path in enumerate(paths):
             if frame < len(path):  # If the frame index exists in the path
                 x, y = path[frame]
-                frame_detections.append((frame, x, y, truth_id))
+                frame_detections.append((frame, x + random.uniform(-MEAS_NOISE, MEAS_NOISE), y + random.uniform(MEAS_NOISE, MEAS_NOISE), truth_id))
     
     return frame_detections
 
