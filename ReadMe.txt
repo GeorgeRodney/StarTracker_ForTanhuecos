@@ -63,4 +63,5 @@ TODO LIST
         [X] Added unique ID to trackFiles
         [X] Added truth ID to detections
         [X] Added truth ID hand off from det to track during correlation
-
+        [O] Create Track to Truth assignment matrix
+        [O] Define a single metric and plot it
