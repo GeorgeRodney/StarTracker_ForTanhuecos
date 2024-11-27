@@ -88,7 +88,7 @@ public:
                 predCov(MatrixXd::Zero(4,4)),
                 estCov(MatrixXd::Zero(4,4)),
                 gate(10.0),
-                procNoise(ACCEL_STD),
+                procNoise(ACCEL_STD*ACCEL_STD),
                 uniqueId(-1),
                 truth_id(-1),
                 K(MatrixXd::Zero(4,2))
