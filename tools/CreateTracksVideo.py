@@ -14,9 +14,10 @@ TRACK = 1
 
 # FPA_ROW = 1080
 # FPA_COL = 1920
-
-FPA_ROW = 512
-FPA_COL = 512
+FPA_ROW = 1024
+FPA_COL = 1024
+# FPA_ROW = 512
+# FPA_COL = 512
 
 ######################### RUN TFM #################################
 # run_command = "cd ../build && ./run 2>&1 | tee ../output/test.csv"
@@ -65,6 +66,7 @@ for line in range(len(lines)):
 fig = plt.figure(figsize=(20, 10))
 ax = plt.gca()
 ax.set_facecolor('black')
+ax.set_aspect('equal', adjustable='box')
 plt.xlim(0, FPA_COL)
 plt.ylim(0, FPA_ROW)
 plt.gca().invert_yaxis()
@@ -76,6 +78,7 @@ plt.gca().invert_yaxis()
 def update(frame):
     ax.cla()  # Clear the axis for the next frame
     ax.set_facecolor('black')
+    ax.set_aspect('equal', adjustable='box')
     plt.xlim(0, FPA_COL)
     plt.ylim(0, FPA_ROW)
     plt.gca().invert_yaxis()
