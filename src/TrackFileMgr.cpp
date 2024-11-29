@@ -179,7 +179,7 @@ void TrackFileMgr::modifyActiveList()
     }
 }
 
-void TrackFileMgr::broadcastMetrics()
+void TrackFileMgr::fillPerformanceArray()
 {
     // Loop over truth IDs and fill in Perf Truth Objects
     for (int det = 0; det < m_dets.numDets; ++det)

@@ -135,7 +135,7 @@ int main()
         |   5.  Frame clean up / send data for performance
         |
         >----------------------------------------------------------------------------*/
-        // std::map<int, int> track_associations = get_current_associations();
+        tracker_.fillPerformanceArray();
         // metrics_publisher_.queue_frame_data(tracker_.m_frame, track_associations, processing_time);
         for (int det = 0; det < tracker_.m_dets.numDets; det++)
         {

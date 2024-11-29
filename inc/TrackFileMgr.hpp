@@ -23,7 +23,7 @@ public:
     void checkPersistency();
     void frameCleanUp();
     void attemptOpenTracks();
-    void broadcastMetrics();
+    void fillPerformanceArray();
     void updateTrackVariables();
     void modifyActiveList();
 
