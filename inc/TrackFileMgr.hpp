@@ -14,6 +14,7 @@ public:
     uint16_t m_numActiveTracks;
     vector<int> m_activeList;
     Eigen::MatrixXi m_truthToTrack;
+    vector<PerfTruth> m_perfTruth;
 
     void updateFrameVariables();
     void predictTrackLocation(double dt);

@@ -9,9 +9,8 @@ TrackFileMgr::TrackFileMgr()
     m_dets(),
     m_numActiveTracks(0),
     m_activeList(TRACK_MAX, -1),
-    m_truthToTrack(Eigen::MatrixXi::Zero(TRUTH_MAX,TRACK_MAX))
+    m_perfTruth(TRUTH_MAX, PerfTruth(-1, -1, false))
 {
-    m_truthToTrack.setConstant(-1);
 }
 
 TrackFileMgr::~TrackFileMgr()
@@ -182,6 +181,31 @@ void TrackFileMgr::modifyActiveList()
 
 void TrackFileMgr::broadcastMetrics()
 {
+    // Loop over truth IDs and fill in Perf Truth Objects
+    for (int det = 0; det < m_dets.numDets; ++det)
+    {
+        if (m_dets.detList[det].truth_id != -1)
+        {
+            int perfTruthId = m_dets.detList[det].truth_id;
+
+            m_perfTruth[perfTruthId].valid_ = true;
+            m_perfTruth[perfTruthId].truthId_ = perfTruthId; // Redundant since the index of the array is the truth ID. Might be easier to use in the processing script
+        }
+    }
+
+    // Loop over tracks and fill Perf Truth Objects
+    for (int track = 0; track < m_numActiveTracks; ++track)
+    {
+        int activeTrkId = m_activeList[track];
+
+        if(m_tracks.trackFiles[activeTrkId].truth_id != -1)
+        {
+            int perfTruthId = m_tracks.trackFiles[activeTrkId].truth_id;
+
+            m_perfTruth[perfTruthId].valid_ = true;
+            m_perfTruth[perfTruthId].trackUniqueId_ = m_tracks.trackFiles[activeTrkId].uniqueId;
+        }   
+    }
 
 }
 
@@ -203,6 +227,11 @@ void TrackFileMgr::frameCleanUp()
     for (int det = 0; det < DET_MAX; det++)
     {
         m_dets.detList[det].clearDet();
+    }
+
+    for (int perfId = 0; perfId < TRUTH_MAX; ++perfId)
+    {
+        m_perfTruth[perfId].reset();
     }
 
 }

@@ -142,6 +142,30 @@ public:
 
 };
 
+class PerfTruth
+{
+    public:
+    int truthId_;
+    int trackUniqueId_;
+    bool valid_;
+
+    PerfTruth(int truthId, int trackId, bool valid)
+        :   truthId_(truthId),
+            trackUniqueId_(trackId),
+            valid_(valid)
+    {
+        
+    }
+
+    void reset()
+    {
+        truthId_ = -1;
+        trackUniqueId_ = -1;
+        valid_ = false;
+    }
+    
+};
+
 class DetList
 {
     public:
