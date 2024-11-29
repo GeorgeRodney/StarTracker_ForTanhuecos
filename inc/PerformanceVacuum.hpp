@@ -3,12 +3,13 @@
 #include <queue>
 #include <thread>
 #include <mutex>
+#include "TrkUtility.hpp"
 
 using json = nlohmann::json;
 
 struct FrameMetrics {
     int frame_num;
-    std::map<int, int> associations;
+    vector<PerfTruth> associations;
     double processing_time;
 };
 
@@ -37,13 +38,30 @@ private:
                 try {
                     json batch_data = json::array();
                     for (const auto& metrics : batch) {
-                        batch_data.push_back({
+                        // Create a JSON object for each frame
+                        json frame_data = {
                             {"frame", metrics.frame_num},
-                            {"associations", metrics.associations},
                             {"processing_time", metrics.processing_time}
-                        });
+                        };
+
+                        // Serialize the associations (PerfTruth) into the JSON object
+                        json associations_array = json::array();
+                        for (const auto& perf_truth : metrics.associations) {
+                            // Assuming PerfTruth has 'id' and 'value' members (adjust based on your actual class)
+                            associations_array.push_back({
+                                {"truth_id", perf_truth.valid_},
+                                {"truth_id", perf_truth.truthId_},  // Replace with actual field names in PerfTruth
+                                {"track_id", perf_truth.trackUniqueId_} // Replace with actual field names in PerfTruth
+                            });
+                        }
+
+                        frame_data["associations"] = associations_array;
+
+                        // Add the frame data to the batch
+                        batch_data.push_back(frame_data);
                     }
-                    
+
+                    // Convert the batch data to a string and send it via the socket
                     std::string msg = batch_data.dump() + "\n";
                     boost::asio::write(socket, boost::asio::buffer(msg));
                 } catch (const std::exception& e) {
@@ -76,7 +94,7 @@ public:
     }
 
     void queue_frame_data(int frame_num, 
-                         const std::map<int, int>& track_associations,
+                         const vector<PerfTruth>& track_associations,
                          double processing_time) {
         std::lock_guard<std::mutex> lock(queue_mutex);
         metrics_queue.push({frame_num, track_associations, processing_time});
