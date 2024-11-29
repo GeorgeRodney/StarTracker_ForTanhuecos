@@ -18,6 +18,7 @@ using namespace Eigen;
 using namespace std;
 
 #define DEGREE 2
+#define TRUTH_MAX 200
 #define TRACK_MAX 200
 #define STATE_MAX 200
 #define DET_MAX   100

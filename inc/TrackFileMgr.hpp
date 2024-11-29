@@ -13,6 +13,7 @@ public:
     DetList m_dets;
     uint16_t m_numActiveTracks;
     vector<int> m_activeList;
+    Eigen::MatrixXi m_truthToTrack;
 
     void updateFrameVariables();
     void predictTrackLocation(double dt);
@@ -21,6 +22,7 @@ public:
     void checkPersistency();
     void frameCleanUp();
     void attemptOpenTracks();
+    void broadcastMetrics();
     void updateTrackVariables();
     void modifyActiveList();
 

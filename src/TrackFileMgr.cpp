@@ -8,8 +8,10 @@ TrackFileMgr::TrackFileMgr()
     m_tracks(),
     m_dets(),
     m_numActiveTracks(0),
-    m_activeList(TRACK_MAX, -1)
+    m_activeList(TRACK_MAX, -1),
+    m_truthToTrack(Eigen::MatrixXi::Zero(TRUTH_MAX,TRACK_MAX))
 {
+    m_truthToTrack.setConstant(-1);
 }
 
 TrackFileMgr::~TrackFileMgr()
@@ -176,6 +178,11 @@ void TrackFileMgr::modifyActiveList()
             m_numActiveTracks++;
         }
     }
+}
+
+void TrackFileMgr::broadcastMetrics()
+{
+
 }
 
 void TrackFileMgr::updateFrameVariables()
